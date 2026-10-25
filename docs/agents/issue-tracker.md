@@ -14,6 +14,14 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
+## When a task is done
+
+Update its issue before ending the session:
+
+1. Tick the acceptance criteria that are met: `gh issue view <n> --json body --jq .body`, replace `- [ ]` with `- [x]` for each met item, write it back with `gh issue edit <n> --body-file -`. Leave unmet items unticked and say why in the comment.
+2. Comment with what was built, the commit SHA, the verification run (`check`, `test`, `build`), and any known limitations or follow-ups.
+3. Close it with `gh issue close <n> --comment "..."` (steps 2 and 3 can be one command) once the commit is on `origin`. If it isn't pushed yet, comment now and close after the push.
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_
