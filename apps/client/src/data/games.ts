@@ -1,11 +1,12 @@
 import { gameTraits } from "../mocks/game-traits.ts";
 import { games } from "../mocks/games.ts";
+import { findActivityBySlug, listActivitySlugs } from "./activities.ts";
 import type { Game, Trait } from "./types.ts";
 
 export const getGame = async (slug: string): Promise<Game | null> =>
-  games.find((game) => game.slug === slug) ?? null;
+  findActivityBySlug(games, slug);
 
 export const listGameSlugs = async (): Promise<string[]> =>
-  games.map((game) => game.slug);
+  listActivitySlugs(games);
 
 export const getGameTraits = async (): Promise<Trait[]> => gameTraits;

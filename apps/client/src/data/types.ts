@@ -12,15 +12,26 @@ export type Trait = {
 
 export type TraitMark = "yes" | "no";
 
-export type Game = {
-  category: "games";
+type ActivityBase = {
   slug: string;
   title: string;
   description: string;
   year: number;
   genres: string[];
-  platforms: string[];
-  playModes: string[];
   /** Keyed by trait id; a trait missing from the record is unknown. */
   traitMarks: Record<string, TraitMark>;
 };
+
+export type Game = ActivityBase & {
+  category: "games";
+  platforms: string[];
+  playModes: string[];
+};
+
+export type Movie = ActivityBase & {
+  category: "movies";
+  runtimeMinutes: number;
+  director: string;
+};
+
+export type Activity = Game | Movie;
