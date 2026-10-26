@@ -12,6 +12,13 @@ export type Trait = {
 
 export type TraitMark = "yes" | "no";
 
+export type Question = {
+  id: string;
+  category: CategorySlug;
+  traitId: string;
+  text: string;
+};
+
 type ActivityBase = {
   slug: string;
   title: string;
@@ -35,3 +42,11 @@ export type Movie = ActivityBase & {
 };
 
 export type Activity = Game | Movie;
+
+/** Everything a session in one category needs. */
+export type SessionData = {
+  category: CategorySlug;
+  traits: Trait[];
+  questions: Question[];
+  activities: Activity[];
+};
