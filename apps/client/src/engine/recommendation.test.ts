@@ -294,6 +294,109 @@ describe("getNextStep: stop conditions", () => {
   });
 });
 
+describe("getNextStep: session controls", () => {
+  const traitIds = Array.from({ length: 40 }, (_, index) => `t${index}`);
+  const manyTraitsActivities = Array.from({ length: 20 }, (_, index) =>
+    activity(
+      `a${index}`,
+      Object.fromEntries(
+        traitIds.map((traitId) => [traitId, index < 10 ? "yes" : "no"]),
+      ),
+    ),
+  );
+  const manyTraitsQuestions = traitIds.map(question);
+  const dontKnowAnswers = (count: number) =>
+    traitIds.slice(0, count).map((traitId) => answered(traitId, "dontKnow"));
+
+  test("undoing the last answer equals computing without it", () => {
+    const activities = Array.from({ length: 10 }, (_, index) =>
+      activity(`a${index}`, {
+        even: index < 5 ? "yes" : "no",
+        other: index % 3 === 0 ? "yes" : "no",
+      }),
+    );
+    const questions = [question("even"), question("other")];
+    const answers = [answered("even", "dontKnow")];
+
+    const afterUndo = getNextStep({
+      activities,
+      questions,
+      answers: answers.slice(0, -1),
+    });
+
+    assert.deepEqual(
+      afterUndo,
+      getNextStep({ activities, questions, answers: [] }),
+    );
+    assert.equal(askedQuestionId(afterUndo), "q-even");
+  });
+
+  test("keeps asking after a rejection although the leaders stand out", () => {
+    const activities = activitiesSplitBy(8, "first", 3).map((candidate) => ({
+      ...candidate,
+      traitMarks: {
+        ...candidate.traitMarks,
+        second: candidate.slug === "a0" ? ("yes" as const) : ("no" as const),
+      },
+    }));
+    const input = {
+      activities,
+      questions: [question("first"), question("second")],
+      answers: [answered("first", "yes")],
+    };
+
+    assert.equal(getNextStep(input).kind, "recommendation");
+
+    const rejected = getNextStep({ ...input, rejectedAtCount: 1 });
+
+    assert.equal(askedQuestionId(rejected), "q-second");
+    assert.equal(rejected.kind === "question" && rejected.answeredCount, 1);
+  });
+
+  test("counts the question limit from the rejected recommendation", () => {
+    const input = {
+      activities: manyTraitsActivities,
+      questions: manyTraitsQuestions,
+    };
+
+    const atLimit = getNextStep({ ...input, answers: dontKnowAnswers(15) });
+    const afterRejection = getNextStep({
+      ...input,
+      answers: dontKnowAnswers(15),
+      rejectedAtCount: 15,
+    });
+    const beforeNewLimit = getNextStep({
+      ...input,
+      answers: dontKnowAnswers(29),
+      rejectedAtCount: 15,
+    });
+    const atNewLimit = getNextStep({
+      ...input,
+      answers: dontKnowAnswers(30),
+      rejectedAtCount: 15,
+    });
+
+    assert.equal(atLimit.kind, "recommendation");
+    assert.equal(askedQuestionId(afterRejection), "q-t15");
+    assert.equal(askedQuestionId(beforeNewLimit), "q-t29");
+    assert.equal(atNewLimit.kind, "recommendation");
+  });
+
+  test("shows the recommendation again when no useful question is left after a rejection", () => {
+    const activities = activitiesSplitBy(8, "trait", 2);
+    const input = {
+      activities,
+      questions: [question("trait")],
+      answers: [answered("trait", "yes")],
+    };
+
+    const step = getNextStep({ ...input, rejectedAtCount: 1 });
+
+    assert.deepEqual(step, getNextStep(input));
+    assert.equal(step.kind, "recommendation");
+  });
+});
+
 describe("getNextStep: recommendation", () => {
   test("holds the five best-ranked activities", () => {
     const step = getNextStep({

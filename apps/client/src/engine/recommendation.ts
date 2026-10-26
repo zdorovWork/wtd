@@ -25,6 +25,8 @@ export type SessionInput<
   questions: TQuestion[];
   /** In the order they were given. */
   answers: GivenAnswer[];
+  /** Number of answers given when the person last rejected a recommendation. */
+  rejectedAtCount?: number;
 };
 
 export type NextStep<
@@ -113,6 +115,7 @@ export const getNextStep = <
   activities,
   questions,
   answers,
+  rejectedAtCount,
 }: SessionInput<TActivity, TQuestion>): NextStep<TActivity, TQuestion> => {
   const ranked = rankActivities(activities, questions, answers);
   const leaders = findLeaders(ranked);
@@ -127,8 +130,10 @@ export const getNextStep = <
         splitBalance(leaders, second) - splitBalance(leaders, first),
     );
 
-  const leadersStandOut = leaders.length <= RECOMMENDATION_SIZE;
-  const reachedLimit = answers.length >= QUESTION_LIMIT;
+  const wasRejected = rejectedAtCount !== undefined;
+  const leadersStandOut = !wasRejected && leaders.length <= RECOMMENDATION_SIZE;
+  const reachedLimit =
+    answers.length - (rejectedAtCount ?? 0) >= QUESTION_LIMIT;
 
   if (leadersStandOut || reachedLimit || !bestQuestion) {
     return {
