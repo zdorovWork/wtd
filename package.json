@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "pnpm --recursive --parallel --if-present dev",
     "build": "pnpm --recursive --if-present build",
+    "start": "pnpm --recursive --parallel --if-present start",
     "check": "biome check . && pnpm --recursive --if-present check",
     "test": "pnpm --recursive --if-present test"
   },
