@@ -16,9 +16,9 @@ pnpm-workspaces monorepo (see `docs/adr/0001-client-first-monorepo-with-mocks.md
 - English everywhere: code, UI copy, docs, issues.
 - Biome is the single linter and formatter for the whole repo (`docs/adr/0003-biome-instead-of-eslint.md`).
 - **Branches**: `develop` is the default branch, `main` is production. Work on `feature/WTD-<n>-<slug>` created from `develop` and open a PR into `develop`; never push to `develop` or `main` directly. See `docs/agents/delivery-flow.md`.
-- **Commits**: after implementing a task, wait: the user tests it locally. Commit, push, and open a PR into `develop` only after the user approves. The user merges the PR and closes the issue; the agent never merges. Prefix the message with the GitHub issue number as `WTD-<n>`: `WTD-2 feat (client): add category picker`.
+- **Commits**: after implementing a task, wait: the user tests it locally. Commit, push, and open a PR into `develop` only after the user approves. The PR body starts with `Closes #<n>` when the task has an issue; the user merges the PR and the issue closes automatically. The agent never merges. Prefix the message with the GitHub issue number as `WTD-<n>`: `WTD-2 feat (client): add category picker`.
 - **Before a PR**: run `pnpm check`, `pnpm test`, and `pnpm build`; CI runs the same commands.
-- **Issues**: after opening the PR, if the task has a GitHub issue, add a short comment on it: what was built and the PR link. The user ticks the acceptance criteria and closes the issue. See `docs/agents/issue-tracker.md`.
+- **Issues**: after opening the PR, if the task has a GitHub issue, add a short comment on it: what was built and the PR link. The user ticks the acceptance criteria; the issue closes when the PR is merged. See `docs/agents/issue-tracker.md`.
 - **Dependencies**: add a library only after the user approves it. Propose it with what it is for and why the platform, Node.js, or Next.js built-ins fall short.
 
 ## Agent skills

@@ -17,7 +17,7 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 ## When a task is done
 
-After the user approves the task and the agent opens the PR (see `docs/agents/delivery-flow.md`), if the task has an issue, add one short comment: what was built and the PR link, plus known limitations if any. The agent does not tick criteria, merge, or close; the user does that after merging.
+After the user approves the task and the agent opens the PR (see `docs/agents/delivery-flow.md`), if the task has an issue, add one short comment: what was built and the PR link, plus known limitations if any. The PR body starts with `Closes #<n>`, so the issue closes when the user merges. The agent does not tick criteria or merge; the user ticks the criteria and merges.
 
 ## Pull requests as a triage surface
 
