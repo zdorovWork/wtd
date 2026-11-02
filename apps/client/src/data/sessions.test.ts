@@ -55,13 +55,13 @@ for (const category of categorySlugs) {
       assert.equal(new Set(ids).size, ids.length);
     });
 
-    test("every question references an existing trait of its own category", async () => {
-      const { questions, traits } = await getSession(category);
-      const traitIds = new Set(traits.map((trait) => trait.id));
+    test("every question references an existing tag of its own category", async () => {
+      const { questions, tags } = await getSession(category);
+      const tagIds = new Set(tags.map((tag) => tag.id));
 
       for (const question of questions) {
         assert.equal(question.category, category, question.id);
-        assert.ok(traitIds.has(question.traitId), question.id);
+        assert.ok(tagIds.has(question.tagId), question.id);
       }
     });
   });
