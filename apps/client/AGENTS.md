@@ -5,8 +5,8 @@ Next.js (App Router), TypeScript strict, Tailwind CSS. Design is not ready yet: 
 ## Structure
 
 - `src/app/`: routes. `/` picks a category, `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages, statically generated.
-- `src/engine/`: the recommendation engine. Plain TypeScript, importing nothing from React or Next.js, so it can move to `apps/server` unchanged (`docs/adr/0002-trait-scoring-recommendation-engine.md` at the repo root).
-- `src/data/`: async data-access functions shaped like the future server API. Components and routes get activities, questions, and traits only through this layer.
+- `src/engine/`: the recommendation engine. Plain TypeScript, importing nothing from React or Next.js, so it can move to `apps/server` unchanged (`docs/adr/0002-tag-scoring-recommendation-engine.md` at the repo root).
+- `src/data/`: async data-access functions shaped like the future server API. Components and routes get activities, questions, and tags only through this layer.
 - `src/mocks/`: mock data, imported only by `src/data/`.
 - `src/components/`: React components shared between routes, such as the activity page layout.
 

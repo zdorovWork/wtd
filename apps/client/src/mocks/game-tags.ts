@@ -1,6 +1,6 @@
-import type { Trait } from "../data/types.ts";
+import type { Tag } from "../data/types.ts";
 
-export const gameTraits: Trait[] = [
+export const gameTags: Tag[] = [
   { id: "coOp", label: "Co-op" },
   { id: "onlineMultiplayer", label: "Online multiplayer" },
   { id: "competitive", label: "Competitive" },

@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import type { Activity, CategorySlug, Trait } from "./types.ts";
+import type { Activity, CategorySlug, Tag } from "./types.ts";
 
 type CategoryDataAccess = {
   category: CategorySlug;
   getActivity: (slug: string) => Promise<Activity | null>;
   listSlugs: () => Promise<string[]>;
-  getTraits: () => Promise<Trait[]>;
+  getTags: () => Promise<Tag[]>;
 };
 
 export const testActivityIntegrity = ({
   category,
   getActivity,
   listSlugs,
-  getTraits,
+  getTags,
 }: CategoryDataAccess) => {
   const getAllActivities = async (): Promise<Activity[]> => {
     const slugs = await listSlugs();
@@ -42,28 +42,33 @@ export const testActivityIntegrity = ({
       }
     });
 
-    test(`every trait mark references an existing ${category} trait`, async () => {
-      const traitIds = new Set((await getTraits()).map((trait) => trait.id));
+    test(`every activity tag references an existing ${category} tag, once`, async () => {
+      const tagIds = new Set((await getTags()).map((tag) => tag.id));
 
       for (const activity of await getAllActivities()) {
-        for (const traitId of Object.keys(activity.traitMarks)) {
-          assert.ok(
-            traitIds.has(traitId),
-            `${activity.slug} marks "${traitId}"`,
-          );
+        assert.equal(
+          new Set(activity.tags).size,
+          activity.tags.length,
+          `${activity.slug} repeats a tag`,
+        );
+        for (const tagId of activity.tags) {
+          assert.ok(tagIds.has(tagId), `${activity.slug} has "${tagId}"`);
         }
       }
     });
 
-    test(`every ${category} trait has at least one yes and one no activity`, async () => {
+    test(`every ${category} tag is held by some activities but not all`, async () => {
       const activities = await getAllActivities();
 
-      for (const trait of await getTraits()) {
-        const marks = activities.map(
-          (activity) => activity.traitMarks[trait.id],
+      for (const tag of await getTags()) {
+        const holders = activities.filter((activity) =>
+          activity.tags.includes(tag.id),
         );
-        assert.ok(marks.includes("yes"), `nothing marks "${trait.id}" yes`);
-        assert.ok(marks.includes("no"), `nothing marks "${trait.id}" no`);
+        assert.ok(holders.length > 0, `nothing has "${tag.id}"`);
+        assert.ok(
+          holders.length < activities.length,
+          `everything has "${tag.id}"`,
+        );
       }
     });
   });
