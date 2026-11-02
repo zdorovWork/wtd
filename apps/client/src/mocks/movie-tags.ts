@@ -1,6 +1,6 @@
-import type { Trait } from "../data/types.ts";
+import type { Tag } from "../data/types.ts";
 
-export const movieTraits: Trait[] = [
+export const movieTags: Tag[] = [
   { id: "underTwoHours", label: "Under two hours long" },
   { id: "animated", label: "Animated" },
   { id: "sciFi", label: "Science fiction" },

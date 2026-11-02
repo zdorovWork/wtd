@@ -4,12 +4,12 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 ## Conventions
 
-- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Create an issue**: `gh issue create --title "..." --body-file <path>`. Write bodies of issues, PRs, and comments to a temp file and pass `--body-file`: PowerShell heredocs and backticks corrupt inline `--body` text.
 - **Issue titles** start with `WTD-<n>`, where `<n>` is the issue's own number: `WTD-10 Back-to-home button in sessions`. The number is known only after creation (issues and PRs share one number space), so create the issue, then prefix the title with `gh issue edit <n> --title "WTD-<n> ..."`. Issues #1–#7 predate this rule and stay as they are.
 - **Read an issue**: `gh issue view <number> --json number,title,body,labels,comments`.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Make an issue a sub-issue of a parent**: `gh issue create --parent <parent> ...`, or `gh issue edit <parent> --add-sub-issue <child>` afterwards (`gh` 2.94+). Older `gh`: `gh api --method POST repos/<owner>/<repo>/issues/<parent>/sub_issues -F sub_issue_id=<child-db-id>` (database id, as in **Blocking** below). Without sub-issues, put `Part of #<parent>` at the top of the child body.
-- **Comment on an issue**: `gh issue comment <number> --body "..."`
+- **Comment on an issue**: `gh issue comment <number> --body-file <path>`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
 
@@ -17,11 +17,7 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 ## When a task is done
 
-Update its issue before ending the session:
-
-1. Tick the acceptance criteria that are met: `gh issue view <n> --json body --jq .body`, replace `- [ ]` with `- [x]` for each met item, write it back with `gh issue edit <n> --body-file -`. Leave unmet items unticked and say why in the comment.
-2. Comment with what was built, the commit SHA and PR link, the verification run (`check`, `test`, `build`), and any known limitations or follow-ups.
-3. Close it with `gh issue close <n> --comment "..."` (steps 2 and 3 can be one command) once the commit is on `main` (see `docs/agents/delivery-flow.md`). Until the change is released from `develop`, comment now and leave the issue open.
+Comment on the issue and hand off to the user as described in `docs/agents/delivery-flow.md` (per-task flow, step 4).
 
 ## Pull requests as a triage surface
 

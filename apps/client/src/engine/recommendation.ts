@@ -1,15 +1,13 @@
-export type TraitMark = "yes" | "no";
-
 export type Answer = "yes" | "probably" | "dontKnow" | "probablyNot" | "no";
 
 export type ScorableActivity = {
-  /** Keyed by trait id; a trait missing from the record is unknown. */
-  traitMarks: Record<string, TraitMark>;
+  /** Ids of the tags the activity has; it lacks every other one. */
+  tags: string[];
 };
 
 export type ScorableQuestion = {
   id: string;
-  traitId: string;
+  tagId: string;
 };
 
 export type GivenAnswer = {
@@ -52,21 +50,23 @@ export const ANSWER_WEIGHTS: Record<Answer, number> = {
   no: -1,
 };
 
-const MARK_DIRECTIONS: Record<TraitMark, number> = { yes: 1, no: -1 };
-
 type Scored<TActivity> = { activity: TActivity; score: number };
+
+const hasTag = (activity: ScorableActivity, tagId: string): boolean =>
+  activity.tags.includes(tagId);
 
 const scoreActivity = (
   activity: ScorableActivity,
-  traitIdByQuestionId: Map<string, string>,
+  tagIdByQuestionId: Map<string, string>,
   answers: GivenAnswer[],
 ): number =>
   answers.reduce((score, given) => {
-    const traitId = traitIdByQuestionId.get(given.questionId);
-    const mark = traitId ? activity.traitMarks[traitId] : undefined;
-    if (!mark) return score;
+    const tagId = tagIdByQuestionId.get(given.questionId);
+    if (!tagId) return score;
 
-    return score + ANSWER_WEIGHTS[given.answer] * MARK_DIRECTIONS[mark];
+    const direction = hasTag(activity, tagId) ? 1 : -1;
+
+    return score + ANSWER_WEIGHTS[given.answer] * direction;
   }, 0);
 
 /** Highest score first; ties keep the order the activities came in. */
@@ -75,14 +75,14 @@ const rankActivities = <TActivity extends ScorableActivity>(
   questions: ScorableQuestion[],
   answers: GivenAnswer[],
 ): Scored<TActivity>[] => {
-  const traitIdByQuestionId = new Map(
-    questions.map((question) => [question.id, question.traitId]),
+  const tagIdByQuestionId = new Map(
+    questions.map((question) => [question.id, question.tagId]),
   );
 
   return activities
     .map((activity) => ({
       activity,
-      score: scoreActivity(activity, traitIdByQuestionId, answers),
+      score: scoreActivity(activity, tagIdByQuestionId, answers),
     }))
     .toSorted((first, second) => second.score - first.score);
 };
@@ -95,17 +95,16 @@ const findLeaders = <TActivity>(ranked: Scored<TActivity>[]): TActivity[] => {
     .map((scored) => scored.activity);
 };
 
+/** How close the question's tag comes to splitting the candidates in half. */
 const splitBalance = (
   candidates: ScorableActivity[],
   question: ScorableQuestion,
 ): number => {
-  const marks = candidates.map(
-    (candidate) => candidate.traitMarks[question.traitId],
-  );
-  const yesCount = marks.filter((mark) => mark === "yes").length;
-  const noCount = marks.filter((mark) => mark === "no").length;
+  const withTagCount = candidates.filter((candidate) =>
+    hasTag(candidate, question.tagId),
+  ).length;
 
-  return Math.min(yesCount, noCount);
+  return Math.min(withTagCount, candidates.length - withTagCount);
 };
 
 export const getNextStep = <
