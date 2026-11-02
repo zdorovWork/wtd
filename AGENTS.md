@@ -15,8 +15,10 @@ pnpm-workspaces monorepo (see `docs/adr/0001-client-first-monorepo-with-mocks.md
 - pnpm is the only package manager; Node version comes from `.nvmrc`.
 - English everywhere: code, UI copy, docs, issues.
 - Biome is the single linter and formatter for the whole repo (`docs/adr/0003-biome-instead-of-eslint.md`).
+- **Branches**: `develop` is the default branch, `main` is production. Work on `feature/WTD-<n>-<slug>` created from `develop` and open a PR into `develop`; never push to `develop` or `main` directly. See `docs/agents/delivery-flow.md`.
 - **Commits**: commit or push only after the user approves. Prefix the message with the GitHub issue number as `WTD-<n>`: `WTD-2 feat (client): add category picker`.
-- **Issues**: after finishing a task, update its GitHub issue in the same session: tick the acceptance criteria that are met, comment with what was built, the commit, and any known limitations, and close it once the commit is on `origin`. See `docs/agents/issue-tracker.md`.
+- **Before a PR**: run `pnpm check`, `pnpm test`, and `pnpm build`; CI runs the same commands.
+- **Issues**: after finishing a task, update its GitHub issue in the same session: tick the acceptance criteria that are met, comment with what was built, the commit and PR, and any known limitations, and close it once the commit is on `main`. See `docs/agents/issue-tracker.md`.
 - **Dependencies**: add a library only after the user approves it. Propose it with what it is for and why the platform, Node.js, or Next.js built-ins fall short.
 
 ## Agent skills
