@@ -17,11 +17,7 @@ Infer the repo from `git remote -v`; `gh` does this automatically when run insid
 
 ## When a task is done
 
-Update its issue before ending the session:
-
-1. Tick the acceptance criteria that are met: `gh issue view <n> --json body --jq .body`, replace `- [ ]` with `- [x]` for each met item, write it back with `gh issue edit <n> --body-file -`. Leave unmet items unticked and say why in the comment.
-2. Comment with what was built, the commit SHA and PR link, the verification run (`check`, `test`, `build`), and any known limitations or follow-ups.
-3. Close it with `gh issue close <n> --comment "..."` (steps 2 and 3 can be one command) once the commit is on `main` (see `docs/agents/delivery-flow.md`). Until the change is released from `develop`, comment now and leave the issue open.
+After the user approves the task and the agent opens the PR (see `docs/agents/delivery-flow.md`), if the task has an issue, add one short comment: what was built and the PR link, plus known limitations if any. The agent does not tick criteria, merge, or close; the user does that after merging.
 
 ## Pull requests as a triage surface
 

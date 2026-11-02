@@ -25,6 +25,12 @@ const answerButtons: AnswerButton[] = [
 const buttonClassName =
   "rounded border px-4 py-2 hover:bg-neutral-100 focus-visible:outline-2";
 
+const HomeLink = () => (
+  <Link href="/" className={buttonClassName}>
+    Home
+  </Link>
+);
+
 type RecommendationProps = {
   activities: Activity[];
   onKeepAsking: () => void;
@@ -70,6 +76,7 @@ const Recommendation = ({
         <button type="button" onClick={onStartOver} className={buttonClassName}>
           Start over
         </button>
+        <HomeLink />
       </div>
     </section>
   );
@@ -171,8 +178,8 @@ export const Session = ({ sessionData }: SessionProps) => {
           </button>
         ))}
       </fieldset>
-      {answeredCount > 0 && (
-        <div>
+      <div className="flex flex-wrap gap-2">
+        {answeredCount > 0 && (
           <button
             type="button"
             onClick={handleBack}
@@ -180,8 +187,9 @@ export const Session = ({ sessionData }: SessionProps) => {
           >
             Back
           </button>
-        </div>
-      )}
+        )}
+        <HomeLink />
+      </div>
     </section>
   );
 };
