@@ -5,17 +5,15 @@ export type Category = {
   name: string;
 };
 
-export type Trait = {
+export type Tag = {
   id: string;
   label: string;
 };
 
-export type TraitMark = "yes" | "no";
-
 export type Question = {
   id: string;
   category: CategorySlug;
-  traitId: string;
+  tagId: string;
   text: string;
 };
 
@@ -25,8 +23,8 @@ type ActivityBase = {
   description: string;
   year: number;
   genres: string[];
-  /** Keyed by trait id; a trait missing from the record is unknown. */
-  traitMarks: Record<string, TraitMark>;
+  /** Ids of the category's tags the activity has; it lacks every other one. */
+  tags: string[];
 };
 
 export type Game = ActivityBase & {
@@ -46,7 +44,7 @@ export type Activity = Game | Movie;
 /** Everything a session in one category needs. */
 export type SessionData = {
   category: CategorySlug;
-  traits: Trait[];
+  tags: Tag[];
   questions: Question[];
   activities: Activity[];
 };

@@ -1,21 +1,21 @@
 import { gameQuestions } from "../mocks/game-questions.ts";
-import { gameTraits } from "../mocks/game-traits.ts";
+import { gameTags } from "../mocks/game-tags.ts";
 import { games } from "../mocks/games.ts";
 import { movieQuestions } from "../mocks/movie-questions.ts";
-import { movieTraits } from "../mocks/movie-traits.ts";
+import { movieTags } from "../mocks/movie-tags.ts";
 import { movies } from "../mocks/movies.ts";
 import type { CategorySlug, SessionData } from "./types.ts";
 
 const sessionsByCategory: Record<CategorySlug, SessionData> = {
   games: {
     category: "games",
-    traits: gameTraits,
+    tags: gameTags,
     questions: gameQuestions,
     activities: games,
   },
   movies: {
     category: "movies",
-    traits: movieTraits,
+    tags: movieTags,
     questions: movieQuestions,
     activities: movies,
   },

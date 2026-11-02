@@ -26,9 +26,9 @@ Something wtd asks the person to narrow down which activities in the chosen cate
 The person's reply to a question, on a five-point scale: Yes, Probably, Don't know, Probably not, No.
 _Avoid_: Response, option
 
-**Trait**:
-A characteristic of activities within one category that a question asks about, such as "co-op" or "under two hours". An activity either has a trait, lacks it, or leaves it unknown.
-_Avoid_: Attribute, tag, property, feature
+**Tag**:
+A characteristic of activities within one category that a question asks about, such as "co-op" or "under two hours". An activity either has a tag or lacks it.
+_Avoid_: Trait, attribute, property, feature
 
 **Session**:
 One run of questions and answers within a single chosen category, from the first question until the person leaves or starts over.

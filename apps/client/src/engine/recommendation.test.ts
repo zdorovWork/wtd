@@ -9,30 +9,34 @@ import {
 
 type FixtureActivity = ScorableActivity & { slug: string };
 
-const activity = (
-  slug: string,
-  traitMarks: FixtureActivity["traitMarks"] = {},
-): FixtureActivity => ({ slug, traitMarks });
+const activity = (slug: string, tags: string[] = []): FixtureActivity => ({
+  slug,
+  tags,
+});
 
-/** Activities `a0`…`a{count - 1}`; the first `yesCount` mark the trait yes, the rest no. */
+/** Activities `a0`…`a{count - 1}`; the first `withTagCount` have the tag, the rest lack it. */
 const activitiesSplitBy = (
   count: number,
-  traitId: string,
-  yesCount: number,
+  tagId: string,
+  withTagCount: number,
 ): FixtureActivity[] =>
   Array.from({ length: count }, (_, index) =>
-    activity(`a${index}`, { [traitId]: index < yesCount ? "yes" : "no" }),
+    activity(`a${index}`, index < withTagCount ? [tagId] : []),
   );
 
-const question = (traitId: string): ScorableQuestion => ({
-  id: `q-${traitId}`,
-  traitId,
+/** The tag ids whose condition holds. */
+const tagsWhere = (conditions: Record<string, boolean>): string[] =>
+  Object.keys(conditions).filter((tagId) => conditions[tagId]);
+
+const question = (tagId: string): ScorableQuestion => ({
+  id: `q-${tagId}`,
+  tagId,
 });
 
 const answered = (
-  traitId: string,
+  tagId: string,
   answer: GivenAnswer["answer"],
-): GivenAnswer => ({ questionId: `q-${traitId}`, answer });
+): GivenAnswer => ({ questionId: `q-${tagId}`, answer });
 
 const askedQuestionId = (step: ReturnType<typeof getNextStep>) => {
   assert.equal(step.kind, "question");
@@ -49,12 +53,12 @@ const recommendedSlugs = (
 };
 
 describe("getNextStep: next question", () => {
-  test("asks the question whose trait splits the candidates most evenly", () => {
+  test("asks the question whose tag splits the candidates most evenly", () => {
     const activities = Array.from({ length: 10 }, (_, index) =>
-      activity(`a${index}`, {
-        lopsided: index === 0 ? "yes" : "no",
-        even: index < 5 ? "yes" : "no",
-      }),
+      activity(
+        `a${index}`,
+        tagsWhere({ lopsided: index === 0, even: index < 5 }),
+      ),
     );
 
     const step = getNextStep({
@@ -69,10 +73,10 @@ describe("getNextStep: next question", () => {
 
   test("never asks an answered question again", () => {
     const activities = Array.from({ length: 10 }, (_, index) =>
-      activity(`a${index}`, {
-        even: index < 5 ? "yes" : "no",
-        other: index % 3 === 0 ? "yes" : "no",
-      }),
+      activity(
+        `a${index}`,
+        tagsWhere({ even: index < 5, other: index % 3 === 0 }),
+      ),
     );
 
     const step = getNextStep({
@@ -85,15 +89,15 @@ describe("getNextStep: next question", () => {
     assert.equal(step.kind === "question" && step.answeredCount, 1);
   });
 
-  test("skips questions whose trait is unknown or identical across the candidates", () => {
+  test("skips questions whose tag no candidate or every candidate has", () => {
     const activities = activitiesSplitBy(10, "even", 5).map((candidate) => ({
       ...candidate,
-      traitMarks: { ...candidate.traitMarks, same: "yes" as const },
+      tags: [...candidate.tags, "everyone"],
     }));
 
     const step = getNextStep({
       activities,
-      questions: [question("unmarked"), question("same"), question("even")],
+      questions: [question("nobody"), question("everyone"), question("even")],
       answers: [],
     });
 
@@ -102,11 +106,14 @@ describe("getNextStep: next question", () => {
 
   test("splits the leading candidates rather than the whole category", () => {
     const activities = Array.from({ length: 14 }, (_, index) =>
-      activity(`a${index}`, {
-        first: index < 7 ? "yes" : "no",
-        splitsLeaders: index < 3 ? "yes" : "no",
-        splitsTrailers: index < 7 || index > 10 ? "yes" : "no",
-      }),
+      activity(
+        `a${index}`,
+        tagsWhere({
+          first: index < 7,
+          splitsLeaders: index < 3,
+          splitsTrailers: index < 7 || index > 10,
+        }),
+      ),
     );
 
     const step = getNextStep({
@@ -124,40 +131,39 @@ describe("getNextStep: next question", () => {
 });
 
 describe("getNextStep: answers", () => {
-  const withTrait = activity("with", { trait: "yes" });
-  const unknown = activity("unknown");
-  const without = activity("without", { trait: "no" });
+  const withTag = activity("with", ["tag"]);
+  const withoutTag = activity("without");
   const rank = (answer: GivenAnswer["answer"]) =>
     recommendedSlugs(
       getNextStep({
-        activities: [without, unknown, withTrait],
-        questions: [question("trait")],
-        answers: [answered("trait", answer)],
+        activities: [withoutTag, withTag],
+        questions: [question("tag")],
+        answers: [answered("tag", answer)],
       }),
     );
 
-  test("Yes ranks activities with the trait first; unknown stays in between", () => {
-    assert.deepEqual(rank("yes"), ["with", "unknown", "without"]);
+  test("Yes ranks activities with the tag first", () => {
+    assert.deepEqual(rank("yes"), ["with", "without"]);
   });
 
-  test("No ranks activities without the trait first; unknown stays in between", () => {
-    assert.deepEqual(rank("no"), ["without", "unknown", "with"]);
+  test("No ranks activities without the tag first", () => {
+    assert.deepEqual(rank("no"), ["without", "with"]);
   });
 
   test("Probably and Probably not lean the same way as Yes and No", () => {
-    assert.deepEqual(rank("probably"), ["with", "unknown", "without"]);
-    assert.deepEqual(rank("probablyNot"), ["without", "unknown", "with"]);
+    assert.deepEqual(rank("probably"), ["with", "without"]);
+    assert.deepEqual(rank("probablyNot"), ["without", "with"]);
   });
 
   test("Don't know leaves the ranking unchanged", () => {
-    assert.deepEqual(rank("dontKnow"), ["without", "unknown", "with"]);
+    assert.deepEqual(rank("dontKnow"), ["without", "with"]);
   });
 
   describe("Probably and Probably not count half as much as a firm answer", () => {
-    const yesYes = activity("yesYes", { first: "yes", second: "yes" });
-    const yesNo = activity("yesNo", { first: "yes", second: "no" });
-    const noYes = activity("noYes", { first: "no", second: "yes" });
-    const noNo = activity("noNo", { first: "no", second: "no" });
+    const yesYes = activity("yesYes", ["first", "second"]);
+    const yesNo = activity("yesNo", ["first"]);
+    const noYes = activity("noYes", ["second"]);
+    const noNo = activity("noNo");
     const questions = [question("first"), question("second")];
 
     test("Yes outweighs a conflicting Probably not", () => {
@@ -176,32 +182,32 @@ describe("getNextStep: answers", () => {
     });
 
     test("two Probably answers weigh exactly as much as one opposing Yes", () => {
-      const unknown = activity("unknown");
-      const firmFirst = activity("firmFirst", {
-        first: "yes",
-        second: "no",
-        third: "no",
-      });
-      const softFirst = activity("softFirst", {
-        first: "no",
-        second: "yes",
-        third: "yes",
-      });
+      const firmFirst = activity("firmFirst", ["first"]);
+      const softFirst = activity("softFirst", ["second", "third"]);
+      const rankInOrder = (activities: FixtureActivity[]) =>
+        recommendedSlugs(
+          getNextStep({
+            activities,
+            questions: [
+              question("first"),
+              question("second"),
+              question("third"),
+            ],
+            answers: [
+              answered("first", "yes"),
+              answered("second", "probably"),
+              answered("third", "probably"),
+            ],
+          }),
+        );
 
-      const step = getNextStep({
-        activities: [unknown, firmFirst, softFirst],
-        questions: [question("first"), question("second"), question("third")],
-        answers: [
-          answered("first", "yes"),
-          answered("second", "probably"),
-          answered("third", "probably"),
-        ],
-      });
-
-      assert.deepEqual(recommendedSlugs(step), [
-        "unknown",
+      assert.deepEqual(rankInOrder([firmFirst, softFirst]), [
         "firmFirst",
         "softFirst",
+      ]);
+      assert.deepEqual(rankInOrder([softFirst, firmFirst]), [
+        "softFirst",
+        "firmFirst",
       ]);
     });
 
@@ -223,14 +229,14 @@ describe("getNextStep: answers", () => {
 });
 
 describe("getNextStep: stop conditions", () => {
-  test("recommends when only questions with unknown or identical traits remain", () => {
+  test("recommends when only questions whose tag no candidate or every candidate has remain", () => {
     const activities = Array.from({ length: 10 }, (_, index) =>
-      activity(`a${index}`, { even: index < 5 ? "yes" : "no", same: "yes" }),
+      activity(`a${index}`, tagsWhere({ even: index < 5, everyone: true })),
     );
 
     const step = getNextStep({
       activities,
-      questions: [question("even"), question("same"), question("unmarked")],
+      questions: [question("even"), question("everyone"), question("nobody")],
       answers: [answered("even", "dontKnow")],
     });
 
@@ -239,10 +245,10 @@ describe("getNextStep: stop conditions", () => {
 
   test("recommends once a few leaders clearly lead the rest, but not before", () => {
     const activities = Array.from({ length: 8 }, (_, index) =>
-      activity(`a${index}`, {
-        first: index < 3 ? "yes" : "no",
-        second: index === 0 ? "yes" : "no",
-      }),
+      activity(
+        `a${index}`,
+        tagsWhere({ first: index < 3, second: index === 0 }),
+      ),
     );
     const questions = [question("first"), question("second")];
 
@@ -268,19 +274,14 @@ describe("getNextStep: stop conditions", () => {
   });
 
   test("recommends after 15 answered questions even if useful ones remain", () => {
-    const traitIds = Array.from({ length: 20 }, (_, index) => `t${index}`);
+    const tagIds = Array.from({ length: 20 }, (_, index) => `t${index}`);
     const activities = Array.from({ length: 20 }, (_, index) =>
-      activity(
-        `a${index}`,
-        Object.fromEntries(
-          traitIds.map((traitId) => [traitId, index < 10 ? "yes" : "no"]),
-        ),
-      ),
+      activity(`a${index}`, index < 10 ? tagIds : []),
     );
-    const questions = traitIds.map(question);
-    const answers = traitIds
+    const questions = tagIds.map(question);
+    const answers = tagIds
       .slice(0, 15)
-      .map((traitId) => answered(traitId, "dontKnow"));
+      .map((tagId) => answered(tagId, "dontKnow"));
 
     const afterFourteen = getNextStep({
       activities,
@@ -295,25 +296,20 @@ describe("getNextStep: stop conditions", () => {
 });
 
 describe("getNextStep: session controls", () => {
-  const traitIds = Array.from({ length: 40 }, (_, index) => `t${index}`);
-  const manyTraitsActivities = Array.from({ length: 20 }, (_, index) =>
-    activity(
-      `a${index}`,
-      Object.fromEntries(
-        traitIds.map((traitId) => [traitId, index < 10 ? "yes" : "no"]),
-      ),
-    ),
+  const tagIds = Array.from({ length: 40 }, (_, index) => `t${index}`);
+  const manyTagsActivities = Array.from({ length: 20 }, (_, index) =>
+    activity(`a${index}`, index < 10 ? tagIds : []),
   );
-  const manyTraitsQuestions = traitIds.map(question);
+  const manyTagsQuestions = tagIds.map(question);
   const dontKnowAnswers = (count: number) =>
-    traitIds.slice(0, count).map((traitId) => answered(traitId, "dontKnow"));
+    tagIds.slice(0, count).map((tagId) => answered(tagId, "dontKnow"));
 
   test("undoing the last answer equals computing without it", () => {
     const activities = Array.from({ length: 10 }, (_, index) =>
-      activity(`a${index}`, {
-        even: index < 5 ? "yes" : "no",
-        other: index % 3 === 0 ? "yes" : "no",
-      }),
+      activity(
+        `a${index}`,
+        tagsWhere({ even: index < 5, other: index % 3 === 0 }),
+      ),
     );
     const questions = [question("even"), question("other")];
     const answers = [answered("even", "dontKnow")];
@@ -334,10 +330,10 @@ describe("getNextStep: session controls", () => {
   test("keeps asking after a rejection although the leaders stand out", () => {
     const activities = activitiesSplitBy(8, "first", 3).map((candidate) => ({
       ...candidate,
-      traitMarks: {
-        ...candidate.traitMarks,
-        second: candidate.slug === "a0" ? ("yes" as const) : ("no" as const),
-      },
+      tags:
+        candidate.slug === "a0"
+          ? [...candidate.tags, "second"]
+          : candidate.tags,
     }));
     const input = {
       activities,
@@ -355,8 +351,8 @@ describe("getNextStep: session controls", () => {
 
   test("counts the question limit from the rejected recommendation", () => {
     const input = {
-      activities: manyTraitsActivities,
-      questions: manyTraitsQuestions,
+      activities: manyTagsActivities,
+      questions: manyTagsQuestions,
     };
 
     const atLimit = getNextStep({ ...input, answers: dontKnowAnswers(15) });
@@ -383,11 +379,11 @@ describe("getNextStep: session controls", () => {
   });
 
   test("shows the recommendation again when no useful question is left after a rejection", () => {
-    const activities = activitiesSplitBy(8, "trait", 2);
+    const activities = activitiesSplitBy(8, "tag", 2);
     const input = {
       activities,
-      questions: [question("trait")],
-      answers: [answered("trait", "yes")],
+      questions: [question("tag")],
+      answers: [answered("tag", "yes")],
     };
 
     const step = getNextStep({ ...input, rejectedAtCount: 1 });
@@ -400,9 +396,9 @@ describe("getNextStep: session controls", () => {
 describe("getNextStep: recommendation", () => {
   test("holds the five best-ranked activities", () => {
     const step = getNextStep({
-      activities: activitiesSplitBy(8, "trait", 2).toReversed(),
-      questions: [question("trait")],
-      answers: [answered("trait", "yes")],
+      activities: activitiesSplitBy(8, "tag", 2).toReversed(),
+      questions: [question("tag")],
+      answers: [answered("tag", "yes")],
     });
 
     assert.deepEqual(recommendedSlugs(step), ["a1", "a0", "a7", "a6", "a5"]);
@@ -410,8 +406,8 @@ describe("getNextStep: recommendation", () => {
 
   test("holds every activity when the category has fewer than five", () => {
     const step = getNextStep({
-      activities: activitiesSplitBy(3, "trait", 1),
-      questions: [question("trait")],
+      activities: activitiesSplitBy(3, "tag", 1),
+      questions: [question("tag")],
       answers: [],
     });
 
