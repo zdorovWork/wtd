@@ -1,35 +1,30 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { ActivityLinkList } from "@/features/activity-link-list";
+import { ActivitySlider } from "@/features/activity-slider";
+import { FeedbackComment } from "@/features/feedback-comment";
+import { RecommendationIntro } from "@/features/recommendation-intro";
 import { SessionActions } from "@/features/session-actions";
+import { SingleActivityCard } from "@/features/single-activity-card";
 import { useQuizSession } from "@/modules/quiz-session";
-import { Typography } from "@/shared/components/typography";
 
 export const RecommendationPanel = () => {
   const { step } = useQuizSession();
-  const headingRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    headingRef.current?.focus();
-  }, []);
 
   if (step.kind !== "recommendation") return null;
 
+  const [featuredActivity] = step.activities;
+  const isSingle = step.activities.length === 1 && featuredActivity;
+
   return (
-    <section className="mt-10 flex flex-col gap-4">
-      <Typography
-        as="h1"
-        size="2xl"
-        weight="semibold"
-        font="heading"
-        tabIndex={-1}
-        ref={headingRef}
-      >
-        Your recommendation
-      </Typography>
-      <ActivityLinkList activities={step.activities} />
+    <section className="flex flex-1 flex-col gap-6">
+      <RecommendationIntro />
+      {isSingle ? (
+        <SingleActivityCard activity={featuredActivity} />
+      ) : (
+        <ActivitySlider activities={step.activities} />
+      )}
       <SessionActions />
+      <FeedbackComment />
     </section>
   );
 };
