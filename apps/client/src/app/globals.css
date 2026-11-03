@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+@theme inline {
+  --font-heading: var(--font-fredoka), ui-rounded, sans-serif;
+  --font-body: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+}
+
+@theme {
+  --color-cream: #fff8e7;
+  --color-sand: #efe3c8;
+  --color-ink: #2b2b2b;
+  --color-duck: #ffd23f;
+  --color-beak: #f7931e;
+  --color-hat: #a0703f;
+  --color-cape: #d9b48f;
+  --color-lens: #cfe8f7;
+
+  --shadow-sticker: 4px 4px 0 0 #2b2b2b;
+  --shadow-sticker-sm: 2px 2px 0 0 #2b2b2b;
+
+  --animate-bob: bob 3.2s ease-in-out infinite;
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
