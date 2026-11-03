@@ -1,0 +1,21 @@
+import type { ReactNode } from "react";
+
+type IconProps = {
+  children: ReactNode;
+};
+
+export const Icon = ({ children }: IconProps) => (
+  <svg
+    width={22}
+    height={22}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);

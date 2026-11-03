@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ActivityPage, activityMetadata } from "@/components/activity-page";
 import { getMovie, listMovieSlugs } from "@/data/movies";
+import { ActivityDetails, activityMetadata } from "@/widgets/activity-details";
 
 export const generateStaticParams = async () => {
   const slugs = await listMovieSlugs();
@@ -24,7 +24,7 @@ const MoviePage = async ({ params }: PageProps<"/movies/[slug]">) => {
   if (!movie) notFound();
 
   return (
-    <ActivityPage
+    <ActivityDetails
       activity={movie}
       categoryDetails={[
         { label: "Runtime", value: `${movie.runtimeMinutes} min` },

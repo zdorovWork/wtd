@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ActivityPage, activityMetadata } from "@/components/activity-page";
 import { getGame, listGameSlugs } from "@/data/games";
+import { ActivityDetails, activityMetadata } from "@/widgets/activity-details";
 
 export const generateStaticParams = async () => {
   const slugs = await listGameSlugs();
@@ -24,7 +24,7 @@ const GamePage = async ({ params }: PageProps<"/games/[slug]">) => {
   if (!game) notFound();
 
   return (
-    <ActivityPage
+    <ActivityDetails
       activity={game}
       categoryDetails={[
         { label: "Platforms", value: game.platforms.join(", ") },

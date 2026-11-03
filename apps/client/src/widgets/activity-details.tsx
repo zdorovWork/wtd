@@ -6,7 +6,7 @@ type ActivityDetail = {
   value: string;
 };
 
-type ActivityPageProps = {
+type ActivityDetailsProps = {
   activity: Activity;
   categoryDetails: ActivityDetail[];
 };
@@ -20,10 +20,10 @@ export const activityMetadata = (activity: Activity | null): Metadata => {
   };
 };
 
-export const ActivityPage = ({
+export const ActivityDetails = ({
   activity,
   categoryDetails,
-}: ActivityPageProps) => {
+}: ActivityDetailsProps) => {
   const details: ActivityDetail[] = [
     { label: "Release year", value: String(activity.year) },
     { label: "Genres", value: activity.genres.join(", ") },
