@@ -1,14 +1,30 @@
 # wtd client
 
-Next.js (App Router), TypeScript strict, Tailwind CSS. Design is not ready yet: build functionality with minimal, structural styling.
+Next.js (App Router), TypeScript strict, Tailwind CSS. The app is a mobile-only column (`max-w-[430px]`, centered, sand outside) set up in `src/app/layout.tsx`; there is no desktop layout.
+
+## Design
+
+- Tokens live in `src/shared/styles/globals.css` (`@theme`): colors (`cream`, `sand`, `ink`, `duck`, `beak`, ...), `shadow-sticker`, `shadow-sticker-sm`, `animate-bob` (use only with `motion-safe:`), and fonts `font-heading` (Fredoka) and `font-body` (Nunito). Use the utilities; never hard-code palette hex values in components.
+- Visual language: 2px `ink` borders, `rounded-2xl`/`rounded-3xl`, sticker shadows, pressed state shifts into the shadow, `beak` focus outline.
+- Shared UI is in `src/shared/components/`: `Button`, `IconButton`, `Typography` (all text: `as`, `size`, `weight`, `font`, `color`, `align` props; no raw text tags or native buttons in widgets and features), `SpeechBubble`, `GenreChips`, `Cover`, `icons/`, and the duck poses `IdleDuck`, `ThinkingDuck`, `HappyDuck` (`detective-duck/`). Reuse them before writing new ones.
+
+## Component rules
+
+- One component per file. A component that needs several files gets its own folder with an `index.ts` that exports its public API.
+- Shared components are dumb: props in, markup out, no project logic or domain types. Large components are decomposed into smaller ones.
+- Logic is added in `src/features/`, which composes shared UI into project elements (`ActivityCover` picks a cover gradient and emoji for an activity). Domain-specific constants such as category emojis live there too. A wrapper without logic is not a feature: import the needed shared component directly (e.g. `HappyDuck`, so only the used pose lands in the bundle).
 
 ## Structure
 
-- `src/app/`: routes. `/` picks a category, `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages, statically generated.
+- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category, `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages, statically generated.
 - `src/engine/`: the recommendation engine. Plain TypeScript, importing nothing from React or Next.js, so it can move to `apps/server` unchanged (`docs/adr/0002-tag-scoring-recommendation-engine.md` at the repo root).
 - `src/data/`: async data-access functions shaped like the future server API. Components and routes get activities, questions, and tags only through this layer.
 - `src/mocks/`: mock data, imported only by `src/data/`.
-- `src/components/`: React components shared between routes, such as the activity page layout.
+- `src/shared/`: code shared across the app, one folder per kind: `components/`, `hooks/`, `styles/`.
+- `src/features/`: project elements with logic, built from shared UI.
+- `src/widgets/`: self-contained UI blocks composed for routes, built from features, such as `activity-details.tsx`. A widget never imports another widget.
+- `src/modules/`: state shared between pages, widgets, and features (e.g. `quiz-session`: provider, `useQuizSession`, `QuizStep`). Features never import each other; they interact only through a module or through props from the widget that composes them.
+- Page-level tags (`main`, `header`, `footer`) live only in `page.tsx`; the rest of the markup is split into widgets and features.
 
 ## Mocks
 

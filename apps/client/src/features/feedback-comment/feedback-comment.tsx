@@ -1,0 +1,146 @@
+"use client";
+
+import { type ChangeEvent, type FormEvent, useId, useState } from "react";
+import { IdleDuck } from "@/shared/components/detective-duck";
+import { SendIcon } from "@/shared/components/icons";
+import { Typography } from "@/shared/components/typography";
+
+type Reaction = {
+  id: string;
+  label: string;
+};
+
+const reactions: Reaction[] = [
+  { id: "nailed", label: "🎯 Nailed it" },
+  { id: "close", label: "🤔 Close" },
+  { id: "missed", label: "👎 Missed" },
+];
+
+type PostedComment = {
+  text: string;
+  reactionLabel: string | undefined;
+};
+
+export const FeedbackComment = () => {
+  const textareaId = useId();
+  const headingId = `${textareaId}-heading`;
+  const [text, setText] = useState("");
+  const [reactionId, setReactionId] = useState<string>();
+  const [postedComment, setPostedComment] = useState<PostedComment>();
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!text.trim() && !reactionId) return;
+
+    setPostedComment({
+      text: text.trim(),
+      reactionLabel: reactions.find((reaction) => reaction.id === reactionId)
+        ?.label,
+    });
+    setText("");
+    setReactionId(undefined);
+  };
+
+  const handleTextChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setText(event.target.value);
+  };
+
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="rounded-3xl border-2 border-ink bg-white p-4 shadow-sticker"
+    >
+      <div className="flex items-center gap-3">
+        <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full border-2 border-ink bg-duck/50">
+          <IdleDuck className="mt-2 w-12" />
+        </span>
+        <div>
+          <Typography
+            as="h2"
+            id={headingId}
+            size="lg"
+            font="heading"
+            weight="semibold"
+            className="leading-tight"
+          >
+            Did I crack the case?
+          </Typography>
+          <Typography as="p" size="xs" className="text-ink/60">
+            Leave a note, it helps me get smarter.
+          </Typography>
+        </div>
+      </div>
+
+      {postedComment && (
+        <div className="mt-4 flex flex-col gap-2">
+          <div className="ml-8 rounded-2xl rounded-tr-sm border-2 border-ink bg-duck/40 px-3 py-2">
+            {postedComment.reactionLabel && (
+              <Typography as="p" size="sm" weight="bold">
+                {postedComment.reactionLabel}
+              </Typography>
+            )}
+            {postedComment.text && (
+              <Typography as="p" size="sm">
+                {postedComment.text}
+              </Typography>
+            )}
+          </div>
+          <Typography
+            as="p"
+            size="sm"
+            className="mr-8 rounded-2xl rounded-tl-sm border-2 border-ink bg-cream px-3 py-2"
+          >
+            Noted in my case file. Thanks, partner!
+          </Typography>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
+        <div className="flex flex-wrap gap-2">
+          {reactions.map((reaction) => {
+            const isPressed = reaction.id === reactionId;
+            const handleToggle = () => {
+              setReactionId(isPressed ? undefined : reaction.id);
+            };
+
+            return (
+              <button
+                key={reaction.id}
+                type="button"
+                aria-pressed={isPressed}
+                onClick={handleToggle}
+                className="rounded-full border-2 border-ink px-3 py-1 transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-beak aria-pressed:bg-ink aria-pressed:[&_span]:text-white"
+              >
+                <Typography as="span" size="sm" weight="bold">
+                  {reaction.label}
+                </Typography>
+              </button>
+            );
+          })}
+        </div>
+        <label htmlFor={textareaId}>
+          <Typography as="span" className="sr-only">
+            Comment
+          </Typography>
+        </label>
+        <div className="flex items-end gap-2 rounded-2xl border-2 border-ink bg-cream p-2 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-beak">
+          <textarea
+            id={textareaId}
+            value={text}
+            onChange={handleTextChange}
+            rows={2}
+            placeholder="What did you think of the recommendation?"
+            className="flex-1 resize-none bg-transparent px-2 py-1 text-sm outline-none placeholder:text-ink/40"
+          />
+          <button
+            type="submit"
+            aria-label="Send comment"
+            className="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-ink bg-beak text-white focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-ink"
+          >
+            <SendIcon />
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+};
