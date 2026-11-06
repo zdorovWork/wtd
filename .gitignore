@@ -8,11 +8,13 @@ next-env.d.ts
 
 # build and test output
 build/
+dist/
 coverage/
 *.tsbuildinfo
 
 # env files
 .env*
+!.env.example
 
 # debug
 npm-debug.log*

@@ -35,10 +35,10 @@ feature/WTD-<n>-<slug> --PR--> develop --PR--> main
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every pull request and every push to `develop` and `main`: `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm test`, `pnpm build`. The single job is named `verify` and is the required status check. Run the same four commands locally before opening a PR.
+`.github/workflows/ci.yml` runs on every pull request and every push to `develop` and `main`: `pnpm install --frozen-lockfile`, server migrate and seed against a Postgres service container, `pnpm check`, `pnpm test`, `pnpm build`. The single job is named `verify` and is the required status check. Run the same four commands locally before opening a PR (`docker compose up` first so the server tests have Postgres).
 
 ## Vercel
 
-- Project `wtd` (team `wtd11`), Root Directory `apps/client`, Production Branch `main`.
+- Project `wtd` (team `wtd11`), Root Directory the repository root, Production Branch `main`. Two services in `vercel.json`: `/api/*` → server, everything else → client. The client reaches the server through the `SERVER_URL` service binding. Dashboard steps: `docs/agents/vercel-neon-setup.md`.
 - Preview deployments are protected by Vercel Authentication, so only team members see them.
-- No environment variables yet; when they appear, scope them per environment (Preview vs Production).
+- `DATABASE_URL` is the Neon pooled connection string, scoped per environment (Production vs Preview vs Development). Preview deployments and `develop` each get their own Neon branch.
