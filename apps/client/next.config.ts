@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const serverUrl = process.env.SERVER_URL;
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
@@ -10,6 +12,18 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  async rewrites() {
+    if (process.env.NODE_ENV === "production" || !serverUrl) {
+      return [];
+    }
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${serverUrl}/api/:path*`,
+      },
+    ];
   },
 };
 
