@@ -16,7 +16,12 @@
       "root": "apps/server",
       "framework": "nestjs",
       "buildCommand": "pnpm migrate && pnpm seed && pnpm build",
-      "entrypoint": "src/main.ts"
+      "entrypoint": "src/main.ts",
+      "functions": {
+        "src/main.ts": {
+          "includeFiles": "{node_modules,../../node_modules}/reflect-metadata/**"
+        }
+      }
     }
   },
   "rewrites": [

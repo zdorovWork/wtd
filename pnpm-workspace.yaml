@@ -4,3 +4,6 @@ packages:
 
 allowBuilds:
   esbuild: true
+
+publicHoistPattern:
+  - reflect-metadata

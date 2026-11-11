@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import "./register-reflect";
 import { createApp } from "./create-app";
 
 const bootstrap = async () => {
