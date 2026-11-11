@@ -10,11 +10,7 @@ import { AnswerList } from "@/widgets/answer-list";
 import { QuestionPrompt } from "@/widgets/question-prompt";
 import { RecommendationPanel } from "@/widgets/recommendation-panel";
 
-export const generateStaticParams = async () => {
-  const categories = await getCategories();
-
-  return categories.map((category) => ({ category: category.slug }));
-};
+export const instant = false;
 
 const SessionPage = async ({ params }: PageProps<"/quiz/[category]">) => {
   const { category } = await params;

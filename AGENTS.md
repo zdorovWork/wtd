@@ -6,8 +6,8 @@ wtd helps people pick something to do: they choose a category (games or movies),
 
 pnpm-workspaces monorepo (see `docs/adr/0001-client-first-monorepo-with-mocks.md`):
 
-- `apps/client`: Next.js app, the only app today. Before working in it, read `apps/client/AGENTS.md`.
-- `apps/server`: planned Node.js server, built once the client is ready. Until then, data is mocked in the client.
+- `apps/client`: Next.js app. Before working in it, read `apps/client/AGENTS.md`.
+- `apps/server`: NestJS API (Express adapter) with Postgres. Before working in it, read `apps/server/AGENTS.md`. Locally Postgres runs through Docker Compose at the repo root; `pnpm dev` starts client and server together.
 - `packages/`: created only when code is genuinely shared between apps.
 
 ## Conventions

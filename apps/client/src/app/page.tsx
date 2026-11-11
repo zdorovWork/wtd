@@ -5,6 +5,8 @@ import { CategoryCard } from "@/features/category-card";
 import { IdleDuck } from "@/shared/components/detective-duck";
 import { SpeechBubble } from "@/shared/components/speech-bubble";
 
+export const instant = false;
+
 const HomePage = async () => {
   const categories = await getCategories();
   const sessions = await Promise.all(
