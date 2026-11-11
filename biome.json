@@ -7,13 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!pnpm-lock.yaml",
-      "!**/dist",
-      "!apps/server/src/server.js",
-      "!**/coverage"
-    ]
+    "includes": ["**", "!pnpm-lock.yaml", "!**/dist", "!**/coverage"]
   },
   "formatter": {
     "enabled": true,

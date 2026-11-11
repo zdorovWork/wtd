@@ -16,7 +16,12 @@
       "root": "apps/server",
       "framework": "nestjs",
       "buildCommand": "pnpm migrate && pnpm seed && pnpm bundle",
-      "entrypoint": "src/server.js"
+      "entrypoint": "src/server.js",
+      "functions": {
+        "src/server.js": {
+          "includeFiles": "dist/server.js"
+        }
+      }
     }
   },
   "rewrites": [

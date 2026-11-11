@@ -1,8 +1,10 @@
+import { copyFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+const bundlePath = path.join(root, "dist/server.js");
 
 await esbuild.build({
   absWorkingDir: root,
@@ -11,7 +13,7 @@ await esbuild.build({
   platform: "node",
   target: "node24",
   format: "cjs",
-  outfile: "src/server.js",
+  outfile: "dist/server.js",
   keepNames: true,
   packages: "bundle",
   external: [
@@ -24,3 +26,7 @@ await esbuild.build({
     "class-validator",
   ],
 });
+
+if (process.env.VERCEL) {
+  await copyFile(bundlePath, path.join(root, "src/server.js"));
+}
