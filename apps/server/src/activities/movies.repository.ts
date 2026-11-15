@@ -51,6 +51,14 @@ export class MoviesRepository {
     @Inject(PostgresService) private readonly postgres: PostgresService,
   ) {}
 
+  async list(): Promise<Movie[]> {
+    const result = await this.postgres.pool.query<MovieRow>(
+      `${movieSelect} ORDER BY m.slug`,
+    );
+
+    return result.rows.map(toMovie);
+  }
+
   async listSlugs(): Promise<string[]> {
     const result = await this.postgres.pool.query<{ slug: string }>(
       "SELECT slug FROM movies ORDER BY slug",

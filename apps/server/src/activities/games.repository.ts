@@ -51,6 +51,14 @@ export class GamesRepository {
     @Inject(PostgresService) private readonly postgres: PostgresService,
   ) {}
 
+  async list(): Promise<Game[]> {
+    const result = await this.postgres.pool.query<GameRow>(
+      `${gameSelect} ORDER BY g.slug`,
+    );
+
+    return result.rows.map(toGame);
+  }
+
   async listSlugs(): Promise<string[]> {
     const result = await this.postgres.pool.query<{ slug: string }>(
       "SELECT slug FROM games ORDER BY slug",
