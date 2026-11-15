@@ -1,4 +1,4 @@
-import type { Tag } from "../data/types.ts";
+import type { Tag } from "../types";
 
 export const gameTags: Tag[] = [
   { id: "coOp", label: "Co-op" },

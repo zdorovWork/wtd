@@ -15,7 +15,7 @@ export const migrate = async (databaseUrl: string): Promise<void> => {
   await new Promise<void>((resolve, reject) => {
     const child = spawn(
       process.execPath,
-      [migrateBin, "up", "-m", "migrations"],
+      [migrateBin, "up", "-m", "migrations", "--advisory-lock-mode", "wait"],
       {
         cwd: serverRoot,
         env: { ...process.env, DATABASE_URL: databaseUrl },

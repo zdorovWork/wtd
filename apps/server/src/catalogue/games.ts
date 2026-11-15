@@ -1,4 +1,4 @@
-import type { Game } from "../data/types.ts";
+import type { Game } from "../types";
 
 export const games: Game[] = [
   {

@@ -5,6 +5,7 @@
     "dist",
     "**/*spec.ts",
     "src/migrate.ts",
-    "src/seed.ts"
+    "src/seed.ts",
+    "src/catalogue/**"
   ]
 }
