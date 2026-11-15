@@ -21,7 +21,7 @@ pnpm migrate
 
 ## Seed
 
-Idempotent. Safe to run more than once; it upserts the current categories.
+Idempotent. Safe to run more than once; it upserts the current categories, tags, games, and movies.
 
 ```
 pnpm seed
@@ -31,7 +31,7 @@ On Vercel the server service build command runs migrate then seed against that d
 
 ## Test
 
-Jest. Unit specs live next to the code (`*.spec.ts`). e2e specs in `test/` hit `GET /api/categories` against a real Postgres.
+Jest. Unit specs live next to the code (`*.spec.ts`). e2e specs in `test/` hit the HTTP API against a real Postgres.
 
 `DATABASE_URL` must point at a running Postgres (Docker Compose locally; the service container in CI). e2e applies migrations and the seed before asserting.
 

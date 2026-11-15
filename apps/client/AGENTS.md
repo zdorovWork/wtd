@@ -16,9 +16,9 @@ Next.js (App Router), TypeScript strict, Tailwind CSS. The app is a mobile-only 
 
 ## Structure
 
-- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category (categories come from `GET /api/categories` on the server; the page renders on request). `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages, statically generated.
+- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category (categories come from `GET /api/categories` on the server; the page renders on request). `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages that load from the server and render on request.
 - `src/engine/`: the recommendation engine. Plain TypeScript, importing nothing from React or Next.js, so it can move to `apps/server` unchanged (`docs/adr/0002-tag-scoring-recommendation-engine.md` at the repo root).
-- `src/data/`: async data-access functions. `getCategories` calls the Nest server (`SERVER_URL` + `/api/categories`). Remaining catalogue reads still go through mocks until later tickets.
+- `src/data/`: async data-access functions. `getCategories`, `getGame`/`listGameSlugs`, and `getMovie`/`listMovieSlugs` call the Nest server (`SERVER_URL` + `/api/...`). Session questions still go through mocks until later tickets.
 - `src/mocks/`: mock data, imported only by `src/data/`.
 - `src/shared/`: code shared across the app, one folder per kind: `components/`, `hooks/`, `styles/`.
 - `src/features/`: project elements with logic, built from shared UI.

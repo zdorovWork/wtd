@@ -23,4 +23,13 @@ export class CategoriesRepository {
       name: row.name,
     }));
   }
+
+  async exists(slug: string): Promise<boolean> {
+    const result = await this.postgres.pool.query<{ slug: string }>(
+      "SELECT slug FROM categories WHERE slug = $1",
+      [slug],
+    );
+
+    return result.rows.length > 0;
+  }
 }

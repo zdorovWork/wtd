@@ -1,4 +1,4 @@
-import { connection } from "next/server";
+import { fetchServerApi } from "./server-api.ts";
 import type { Category, CategorySlug } from "./types.ts";
 
 const categorySlugs: CategorySlug[] = ["games", "movies"];
@@ -22,14 +22,7 @@ const parseCategory = (value: unknown): Category => {
 };
 
 export const getCategories = async (): Promise<Category[]> => {
-  await connection();
-
-  const serverUrl = process.env.SERVER_URL;
-  if (!serverUrl) {
-    throw new Error("SERVER_URL is missing");
-  }
-
-  const response = await fetch(new URL("/api/categories", serverUrl));
+  const response = await fetchServerApi("/api/categories");
   if (!response.ok) {
     throw new Error(`Failed to load categories: ${response.status}`);
   }

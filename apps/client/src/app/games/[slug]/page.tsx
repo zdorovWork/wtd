@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getGame, listGameSlugs } from "@/data/games";
+import { getGame } from "@/data/games";
 import { ActivityDetails, activityMetadata } from "@/widgets/activity-details";
 
-export const generateStaticParams = async () => {
-  const slugs = await listGameSlugs();
-
-  return slugs.map((slug) => ({ slug }));
-};
+export const instant = false;
 
 export const generateMetadata = async ({
   params,
