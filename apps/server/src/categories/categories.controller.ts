@@ -1,14 +1,19 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   NotFoundException,
   Param,
+  Post,
 } from "@nestjs/common";
 import { GamesRepository } from "../activities/games.repository";
 import { MoviesRepository } from "../activities/movies.repository";
 import type { Activity, Category } from "../types";
 import { CategoriesRepository } from "./categories.repository";
+import { NextStepBodyDto } from "./next-step.dto";
+import { type NextStepResponse, NextStepService } from "./next-step.service";
 
 @Controller("categories")
 export class CategoriesController {
@@ -19,11 +24,22 @@ export class CategoriesController {
     private readonly games: GamesRepository,
     @Inject(MoviesRepository)
     private readonly movies: MoviesRepository,
+    @Inject(NextStepService)
+    private readonly nextStep: NextStepService,
   ) {}
 
   @Get()
   list(): Promise<Category[]> {
     return this.categories.list();
+  }
+
+  @Post(":category/next-step")
+  @HttpCode(200)
+  computeNextStep(
+    @Param("category") category: string,
+    @Body() body: NextStepBodyDto,
+  ): Promise<NextStepResponse> {
+    return this.nextStep.compute(category, body);
   }
 
   @Get(":category/activities")

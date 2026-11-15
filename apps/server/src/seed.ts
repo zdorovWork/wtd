@@ -1,10 +1,12 @@
 import { Client } from "pg";
+import { gameQuestions } from "./catalogue/game-questions";
 import { gameTags } from "./catalogue/game-tags";
 import { games } from "./catalogue/games";
+import { movieQuestions } from "./catalogue/movie-questions";
 import { movieTags } from "./catalogue/movie-tags";
 import { movies } from "./catalogue/movies";
 import { loadConfig, sslFor } from "./config";
-import type { Game, Movie, Tag } from "./types";
+import type { Game, Movie, Question, Tag } from "./types";
 
 const upsertTags = async (
   client: Client,
@@ -116,6 +118,24 @@ const upsertMovie = async (client: Client, movie: Movie): Promise<void> => {
   }
 };
 
+const replaceQuestions = async (
+  client: Client,
+  category: "games" | "movies",
+  questions: Question[],
+): Promise<void> => {
+  await client.query("DELETE FROM questions WHERE category = $1", [category]);
+
+  for (const [position, question] of questions.entries()) {
+    await client.query(
+      `
+        INSERT INTO questions (id, category, tag, text, position)
+        VALUES ($1, $2, $3, $4, $5)
+      `,
+      [question.id, question.category, question.tagId, question.text, position],
+    );
+  }
+};
+
 export const seed = async (databaseUrl: string): Promise<void> => {
   const client = new Client({
     connectionString: databaseUrl,
@@ -150,6 +170,9 @@ export const seed = async (databaseUrl: string): Promise<void> => {
       "DELETE FROM movies WHERE NOT (slug = ANY($1::text[]))",
       [movies.map((movie) => movie.slug)],
     );
+
+    await replaceQuestions(client, "games", gameQuestions);
+    await replaceQuestions(client, "movies", movieQuestions);
 
     await deleteRemovedTags(client, "games", gameTags);
     await deleteRemovedTags(client, "movies", movieTags);
