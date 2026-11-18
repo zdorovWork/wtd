@@ -22,8 +22,6 @@ await esbuild.build({
     "@nestjs/microservices/microservices-module",
     "@nestjs/websockets",
     "@nestjs/websockets/socket-module",
-    "class-transformer",
-    "class-validator",
   ],
 });
 

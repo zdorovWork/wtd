@@ -1,4 +1,4 @@
-import type { Answer } from "@/engine/recommendation";
+import type { Answer } from "@/data/types";
 import { Button } from "@/shared/components/button";
 
 type AnswerStyle = {
@@ -25,15 +25,20 @@ const answerStyles: Record<Answer, AnswerStyle> = {
 type AnswerOptionProps = {
   answer: Answer;
   onSelect: (answer: Answer) => void;
+  disabled?: boolean;
 };
 
-export const AnswerOption = ({ answer, onSelect }: AnswerOptionProps) => {
+export const AnswerOption = ({
+  answer,
+  onSelect,
+  disabled = false,
+}: AnswerOptionProps) => {
   const { label, dotClassName } = answerStyles[answer];
 
   const handleSelect = () => onSelect(answer);
 
   return (
-    <Button variant="option" onClick={handleSelect}>
+    <Button variant="option" onClick={handleSelect} disabled={disabled}>
       <span
         aria-hidden="true"
         className={`size-3.5 shrink-0 rounded-full border-2 border-ink ${dotClassName}`}
