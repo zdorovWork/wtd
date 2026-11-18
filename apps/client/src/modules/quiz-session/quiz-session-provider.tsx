@@ -1,89 +1,131 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
-import type { SessionData } from "@/data/types";
-import {
-  type Answer,
-  type GivenAnswer,
-  getNextStep,
-} from "@/engine/recommendation";
+import { type ReactNode, useRef, useState } from "react";
+import { fetchNextStep } from "@/data/next-step";
+import type { Answer, CategorySlug, GivenAnswer, NextStep } from "@/data/types";
 import {
   QuizSessionContext,
   type QuizSessionValue,
 } from "./quiz-session-context";
 
-type SessionProgress = {
+type SessionFrame = {
   answers: GivenAnswer[];
-  rejectedAtCount: number | undefined;
+  rejectedAtCount?: number;
+  step: NextStep;
 };
 
-const initialProgress: SessionProgress = {
-  answers: [],
-  rejectedAtCount: undefined,
+type FailedRequest = {
+  answers: GivenAnswer[];
+  rejectedAtCount?: number;
 };
 
 type QuizSessionProviderProps = {
-  sessionData: SessionData;
+  category: CategorySlug;
+  initialStep: NextStep;
   children: ReactNode;
 };
 
 export const QuizSessionProvider = ({
-  sessionData,
+  category,
+  initialStep,
   children,
 }: QuizSessionProviderProps) => {
-  const [progress, setProgress] = useState<SessionProgress>(initialProgress);
-  const step = getNextStep({
-    activities: sessionData.activities,
-    questions: sessionData.questions,
-    answers: progress.answers,
-    rejectedAtCount: progress.rejectedAtCount,
-  });
+  const [frames, setFrames] = useState<SessionFrame[]>([
+    { answers: [], step: initialStep },
+  ]);
+  const [isPending, setIsPending] = useState(false);
+  const [failedRequest, setFailedRequest] = useState<FailedRequest | null>(
+    null,
+  );
+  const isPendingRef = useRef(false);
+
+  const current = frames[frames.length - 1];
+  if (!current) {
+    throw new Error("Quiz session has no steps");
+  }
+
+  const requestStep = async (
+    answers: GivenAnswer[],
+    rejectedAtCount: number | undefined,
+  ) => {
+    if (isPendingRef.current) return;
+
+    isPendingRef.current = true;
+    setIsPending(true);
+    setFailedRequest(null);
+
+    try {
+      const step = await fetchNextStep(category, { answers, rejectedAtCount });
+      if (!step) {
+        throw new Error("Failed to load next step: 404");
+      }
+
+      setFrames((currentFrames) => [
+        ...currentFrames,
+        { answers, rejectedAtCount, step },
+      ]);
+    } catch {
+      setFailedRequest({ answers, rejectedAtCount });
+    } finally {
+      isPendingRef.current = false;
+      setIsPending(false);
+    }
+  };
 
   const answer = (givenAnswer: Answer) => {
-    if (step.kind !== "question") return;
+    if (failedRequest || current.step.kind !== "question") return;
 
-    setProgress((current) => ({
-      ...current,
-      answers: [
+    void requestStep(
+      [
         ...current.answers,
-        { questionId: step.question.id, answer: givenAnswer },
+        { questionId: current.step.question.id, answer: givenAnswer },
       ],
-    }));
+      current.rejectedAtCount,
+    );
   };
 
   const goBack = () => {
-    setProgress((current) => {
-      const remainingAnswers = current.answers.slice(0, -1);
-      const isRejectionUndone =
-        current.rejectedAtCount !== undefined &&
-        current.rejectedAtCount > remainingAnswers.length;
+    if (isPendingRef.current) return;
 
-      return {
-        answers: remainingAnswers,
-        rejectedAtCount: isRejectionUndone
-          ? undefined
-          : current.rejectedAtCount,
-      };
-    });
+    if (failedRequest) {
+      setFailedRequest(null);
+      return;
+    }
+
+    setFrames((currentFrames) =>
+      currentFrames.length > 1 ? currentFrames.slice(0, -1) : currentFrames,
+    );
   };
 
   const keepAsking = () => {
-    setProgress((current) => ({
-      ...current,
-      rejectedAtCount: current.answers.length,
-    }));
+    if (failedRequest || current.step.kind !== "recommendation") return;
+
+    void requestStep(current.answers, current.answers.length);
   };
 
   const startOver = () => {
-    setProgress(initialProgress);
+    if (isPendingRef.current) return;
+
+    setFailedRequest(null);
+    setFrames((currentFrames) => currentFrames.slice(0, 1));
+  };
+
+  const retry = () => {
+    if (!failedRequest) return;
+
+    void requestStep(failedRequest.answers, failedRequest.rejectedAtCount);
   };
 
   const value: QuizSessionValue = {
-    step,
+    step: current.step,
+    isPending,
+    error: failedRequest !== null,
+    canGoBack: failedRequest !== null || frames.length > 1,
     answer,
     goBack,
     keepAsking,
     startOver,
+    retry,
   };
 
   return (

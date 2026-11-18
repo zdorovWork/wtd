@@ -1,16 +1,19 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { Activity, Question } from "@/data/types";
-import type { Answer, NextStep } from "@/engine/recommendation";
+import type { Answer, NextStep } from "@/data/types";
 
 export type QuizSessionValue = {
-  step: NextStep<Activity, Question>;
+  step: NextStep;
+  isPending: boolean;
+  error: boolean;
+  canGoBack: boolean;
   answer: (answer: Answer) => void;
   /** Undoes the last answer. */
   goBack: () => void;
   keepAsking: () => void;
   startOver: () => void;
+  retry: () => void;
 };
 
 export const QuizSessionContext = createContext<QuizSessionValue | null>(null);

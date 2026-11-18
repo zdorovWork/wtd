@@ -5,15 +5,20 @@ export type Category = {
   name: string;
 };
 
-export type Tag = {
-  id: string;
-  label: string;
+export type Answer = "yes" | "probably" | "dontKnow" | "probablyNot" | "no";
+
+export type GivenAnswer = {
+  questionId: string;
+  answer: Answer;
 };
 
-export type Question = {
+export type NextStepRequest = {
+  answers: GivenAnswer[];
+  rejectedAtCount?: number;
+};
+
+export type SessionQuestion = {
   id: string;
-  category: CategorySlug;
-  tagId: string;
   text: string;
 };
 
@@ -41,10 +46,6 @@ export type Movie = ActivityBase & {
 
 export type Activity = Game | Movie;
 
-/** Everything a session in one category needs. */
-export type SessionData = {
-  category: CategorySlug;
-  tags: Tag[];
-  questions: Question[];
-  activities: Activity[];
-};
+export type NextStep =
+  | { kind: "question"; question: SessionQuestion; answeredCount: number }
+  | { kind: "recommendation"; activities: Activity[] };

@@ -13,18 +13,20 @@ type ButtonLinkProps = ButtonBaseProps & {
   href: string;
   onClick?: never;
   type?: never;
+  disabled?: never;
 };
 
 type ButtonActionProps = ButtonBaseProps & {
   href?: never;
   onClick?: () => void;
   type?: "button" | "submit";
+  disabled?: boolean;
 };
 
 type ButtonProps = ButtonLinkProps | ButtonActionProps;
 
 const baseClassName =
-  "flex items-center gap-2 rounded-2xl border-2 border-ink px-5 py-3.5 font-heading text-lg font-semibold cursor-pointer transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-beak active:shadow-none";
+  "flex items-center gap-2 rounded-2xl border-2 border-ink px-5 py-3.5 font-heading text-lg font-semibold cursor-pointer transition focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-beak active:shadow-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50";
 
 const variantClassNames: Record<ButtonVariant, string> = {
   primary:
@@ -42,6 +44,7 @@ export const Button = ({
   href,
   onClick,
   type = "button",
+  disabled = false,
 }: ButtonProps) => {
   const classNames = `${baseClassName} ${variantClassNames[variant]} ${className}`;
 
@@ -54,7 +57,12 @@ export const Button = ({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classNames}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={classNames}
+    >
       {children}
     </button>
   );
