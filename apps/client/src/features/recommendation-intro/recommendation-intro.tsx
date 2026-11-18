@@ -2,12 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { useQuizSession } from "@/modules/quiz-session";
-import { HappyDuck } from "@/shared/components/detective-duck";
+import { HappyDuck, ThinkingDuck } from "@/shared/components/detective-duck";
 import { SpeechBubble } from "@/shared/components/speech-bubble";
 import { Typography } from "@/shared/components/typography";
 
 export const RecommendationIntro = () => {
-  const { step } = useQuizSession();
+  const { step, isPending } = useQuizSession();
   const headingRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -17,10 +17,11 @@ export const RecommendationIntro = () => {
   if (step.kind !== "recommendation") return null;
 
   const isSingle = step.activities.length === 1;
+  const Duck = isPending ? ThinkingDuck : HappyDuck;
 
   return (
     <section className="grid grid-cols-[34%_1fr] items-end gap-3">
-      <HappyDuck className="w-full motion-safe:animate-bob" />
+      <Duck className="w-full motion-safe:animate-bob" />
       <SpeechBubble tail="left" className="mb-6">
         <Typography
           as="h1"

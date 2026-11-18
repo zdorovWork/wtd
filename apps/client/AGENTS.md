@@ -16,25 +16,19 @@ Next.js (App Router), TypeScript strict, Tailwind CSS. The app is a mobile-only 
 
 ## Structure
 
-- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category, `/quiz/[category]` runs a session and shows the recommendation, `/games/[slug]` and `/movies/[slug]` are activity pages, statically generated.
-- `src/engine/`: the recommendation engine. Plain TypeScript, importing nothing from React or Next.js, so it can move to `apps/server` unchanged (`docs/adr/0002-tag-scoring-recommendation-engine.md` at the repo root).
-- `src/data/`: async data-access functions shaped like the future server API. Components and routes get activities, questions, and tags only through this layer.
-- `src/mocks/`: mock data, imported only by `src/data/`.
+- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category (categories come from `GET /api/categories` on the server; the page renders on request). `/quiz/[category]` runs a session: the first step is fetched on the server, later steps from the browser via `POST /api/categories/:category/next-step`. `/games/[slug]` and `/movies/[slug]` are activity pages that load from the server and render on request.
+- `src/data/`: async data-access functions. They call the Nest server. Server components use `SERVER_URL`; the browser uses relative `/api/...`.
 - `src/shared/`: code shared across the app, one folder per kind: `components/`, `hooks/`, `styles/`.
 - `src/features/`: project elements with logic, built from shared UI.
 - `src/widgets/`: self-contained UI blocks composed for routes, built from features, such as `activity-details.tsx`. A widget never imports another widget.
 - `src/modules/`: state shared between pages, widgets, and features (e.g. `quiz-session`: provider, `useQuizSession`, `QuizStep`). Features never import each other; they interact only through a module or through props from the widget that composes them.
 - Page-level tags (`main`, `header`, `footer`) live only in `page.tsx`; the rest of the markup is split into widgets and features.
 
-## Mocks
-
-Every mock is a future server migration item. When you add or change a mock, update its row in `docs/mocks.md` in the same change: mock file, what it stands in for, and the endpoint or contract it will become.
-
 ## Tests
 
-`node:test`, run directly on `.ts` files by Node. Cover `src/engine/` and `src/data/`. Test suites shared between test files live in `*.testing.ts`, which the `*.test.ts` glob does not run on their own.
+`node:test`, run directly on `.ts` files by Node. Cover `src/data/` parsers and HTTP contract helpers with `fetch` mocked at the process boundary. `getCategories` and the other live server calls are not run by `node:test`. Test suites shared between test files live in `*.testing.ts`, which the `*.test.ts` glob does not run on their own.
 
-Because Node runs these files without a bundler, code in `src/engine/`, `src/data/`, and `src/mocks/` uses relative imports with the `.ts` extension (no `@/` alias) and only erasable TypeScript syntax (`erasableSyntaxOnly` in `tsconfig.json`).
+Because Node runs these files without a bundler, code in `src/data/` uses relative imports with the `.ts` extension (no `@/` alias) and only erasable TypeScript syntax (`erasableSyntaxOnly` in `tsconfig.json`).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -6,14 +6,15 @@ import { HomeIcon, ReplayIcon } from "@/shared/components/icons";
 import { Typography } from "@/shared/components/typography";
 
 export const SessionActions = () => {
-  const { keepAsking, startOver } = useQuizSession();
+  const { keepAsking, startOver, isPending } = useQuizSession();
 
   return (
     <div className="flex flex-col gap-3">
       <button
         type="button"
         onClick={keepAsking}
-        className="self-center rounded-lg underline decoration-2 underline-offset-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-beak"
+        disabled={isPending}
+        className="self-center rounded-lg underline decoration-2 underline-offset-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-beak disabled:pointer-events-none disabled:opacity-50"
       >
         <Typography as="span" size="sm" weight="bold">
           Not quite? Keep asking

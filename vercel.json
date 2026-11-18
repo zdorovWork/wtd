@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "client": {
+      "root": "apps/client",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "server",
+          "format": "url",
+          "env": "SERVER_URL"
+        }
+      ]
+    },
+    "server": {
+      "root": "apps/server",
+      "framework": "nestjs",
+      "buildCommand": "pnpm migrate && pnpm seed && pnpm bundle",
+      "entrypoint": "src/server.js",
+      "functions": {
+        "src/server.js": {
+          "includeFiles": "dist/server.js"
+        }
+      }
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": { "service": "server" } },
+    { "source": "/(.*)", "destination": { "service": "client" } }
+  ]
+}

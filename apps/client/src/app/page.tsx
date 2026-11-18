@@ -1,17 +1,25 @@
-import { notFound } from "next/navigation";
 import { getCategories } from "@/data/categories";
-import { getSessionData } from "@/data/sessions";
+import { listGameSlugs } from "@/data/games";
+import { listMovieSlugs } from "@/data/movies";
+import type { CategorySlug } from "@/data/types";
 import { CategoryCard } from "@/features/category-card";
 import { IdleDuck } from "@/shared/components/detective-duck";
 import { SpeechBubble } from "@/shared/components/speech-bubble";
 
+export const instant = false;
+
+const listSlugsByCategory: Record<CategorySlug, () => Promise<string[]>> = {
+  games: listGameSlugs,
+  movies: listMovieSlugs,
+};
+
 const HomePage = async () => {
   const categories = await getCategories();
-  const sessions = await Promise.all(
-    categories.map((category) => getSessionData(category.slug)),
+  const activityCounts = await Promise.all(
+    categories.map(
+      async (category) => (await listSlugsByCategory[category.slug]()).length,
+    ),
   );
-
-  if (sessions.some((session) => !session)) notFound();
 
   return (
     <main className="flex flex-1 flex-col px-5 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
@@ -46,7 +54,7 @@ const HomePage = async () => {
             <li key={category.slug}>
               <CategoryCard
                 category={category}
-                activityCount={sessions[index]?.activities.length ?? 0}
+                activityCount={activityCounts[index] ?? 0}
               />
             </li>
           ))}

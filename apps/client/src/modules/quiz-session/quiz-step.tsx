@@ -10,7 +10,11 @@ type QuizStepProps = {
 
 /** Shows the slot that matches the current step of the session. */
 export const QuizStep = ({ question, recommendation }: QuizStepProps) => {
-  const { step } = useQuizSession();
+  const { step, error } = useQuizSession();
 
-  return step.kind === "question" ? question : recommendation;
+  if (error || step.kind === "question") {
+    return question;
+  }
+
+  return recommendation;
 };

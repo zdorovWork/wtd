@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getMovie, listMovieSlugs } from "@/data/movies";
+import { getMovie } from "@/data/movies";
 import { ActivityDetails, activityMetadata } from "@/widgets/activity-details";
 
-export const generateStaticParams = async () => {
-  const slugs = await listMovieSlugs();
-
-  return slugs.map((slug) => ({ slug }));
-};
+export const instant = false;
 
 export const generateMetadata = async ({
   params,
