@@ -9,7 +9,7 @@ A single thing a person can do that wtd can recommend, such as one specific game
 _Avoid_: Entity, item, product, title
 
 **Category**:
-A kind of activity the person chooses before answering questions; it limits both the questions asked and the activities recommended. Currently: games and movies.
+A kind of activity the person chooses before answering questions. It has a name and how many activities belong to it, and it limits both the questions asked and the activities recommended. Currently: games and movies.
 _Avoid_: Type, section, vertical
 
 **Game**:

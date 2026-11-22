@@ -1,8 +1,14 @@
-export type CategorySlug = "games" | "movies";
+export const categorySlugs = ["games", "movies"] as const;
+
+export type CategorySlug = (typeof categorySlugs)[number];
+
+export const isCategorySlug = (slug: string): slug is CategorySlug =>
+  categorySlugs.some((known) => known === slug);
 
 export type Category = {
-  slug: CategorySlug;
+  slug: string;
   name: string;
+  activityCount: number;
 };
 
 export type Answer = "yes" | "probably" | "dontKnow" | "probablyNot" | "no";

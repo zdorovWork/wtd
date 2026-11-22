@@ -2,7 +2,7 @@
 
 import { type ReactNode, useRef, useState } from "react";
 import { fetchNextStep } from "@/data/next-step";
-import type { Answer, CategorySlug, GivenAnswer, NextStep } from "@/data/types";
+import type { Answer, GivenAnswer, NextStep } from "@/data/types";
 import {
   QuizSessionContext,
   type QuizSessionValue,
@@ -20,7 +20,7 @@ type FailedRequest = {
 };
 
 type QuizSessionProviderProps = {
-  category: CategorySlug;
+  category: string;
   initialStep: NextStep;
   children: ReactNode;
 };

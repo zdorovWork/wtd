@@ -1,25 +1,12 @@
 import { getCategories } from "@/data/categories";
-import { listGameSlugs } from "@/data/games";
-import { listMovieSlugs } from "@/data/movies";
-import type { CategorySlug } from "@/data/types";
 import { CategoryCard } from "@/features/category-card";
 import { IdleDuck } from "@/shared/components/detective-duck";
 import { SpeechBubble } from "@/shared/components/speech-bubble";
 
 export const instant = false;
 
-const listSlugsByCategory: Record<CategorySlug, () => Promise<string[]>> = {
-  games: listGameSlugs,
-  movies: listMovieSlugs,
-};
-
 const HomePage = async () => {
   const categories = await getCategories();
-  const activityCounts = await Promise.all(
-    categories.map(
-      async (category) => (await listSlugsByCategory[category.slug]()).length,
-    ),
-  );
 
   return (
     <main className="flex flex-1 flex-col px-5 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))]">
@@ -50,12 +37,9 @@ const HomePage = async () => {
           Categories
         </h2>
         <ul className="mt-8 flex flex-col gap-9">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <li key={category.slug}>
-              <CategoryCard
-                category={category}
-                activityCount={activityCounts[index] ?? 0}
-              />
+              <CategoryCard category={category} />
             </li>
           ))}
         </ul>

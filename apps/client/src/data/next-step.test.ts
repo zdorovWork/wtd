@@ -56,10 +56,7 @@ describe("fetchNextStep", () => {
     const call = fetchMock.mock.calls[0];
     assert.ok(call);
     const [url, init] = call.arguments;
-    assert.equal(
-      String(url),
-      "http://server.test/api/categories/games/next-step",
-    );
+    assert.equal(String(url), "http://server.test/api/games/next-step");
     assert.equal(init?.method, "POST");
     const headers = init?.headers;
     assert.ok(headers && "Content-Type" in headers);

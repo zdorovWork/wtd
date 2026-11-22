@@ -16,7 +16,7 @@ Next.js (App Router), TypeScript strict, Tailwind CSS. The app is a mobile-only 
 
 ## Structure
 
-- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category (categories come from `GET /api/categories` on the server; the page renders on request). `/quiz/[category]` runs a session: the first step is fetched on the server, later steps from the browser via `POST /api/categories/:category/next-step`. `/games/[slug]` and `/movies/[slug]` are activity pages that load from the server and render on request.
+- `src/app/`: routes. A route folder holds only `page.tsx` (and `layout.tsx` when needed); everything else goes to `src/widgets/` or `src/features/`; widgets are composed of features. `/` picks a category (categories come from `GET /api/categories` on the server; the page renders on request). `/quiz/[category]` runs a session: the first step is fetched on the server, later steps from the browser via `POST /api/${slug}/next-step`. `/games/[slug]` and `/movies/[slug]` are activity pages that load from the server and render on request.
 - `src/data/`: async data-access functions. They call the Nest server. Server components use `SERVER_URL`; the browser uses relative `/api/...`.
 - `src/shared/`: code shared across the app, one folder per kind: `components/`, `hooks/`, `styles/`.
 - `src/features/`: project elements with logic, built from shared UI.

@@ -66,51 +66,31 @@ describe("activity catalogue API", () => {
     return request(app.getHttpServer());
   };
 
-  it("lists every seeded game slug", async () => {
-    const response = await http().get("/api/categories/games/activities");
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual([...games.map((game) => game.slug)].sort());
-  });
-
-  it("lists every seeded movie slug", async () => {
-    const response = await http().get("/api/categories/movies/activities");
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(
-      [...movies.map((movie) => movie.slug)].sort(),
-    );
-  });
-
-  it("every listed game slug resolves to a games activity", async () => {
-    const slugs = (await http().get("/api/categories/games/activities"))
-      .body as string[];
-
-    for (const slug of slugs) {
-      const response = await http().get(
-        `/api/categories/games/activities/${slug}`,
-      );
+  it("every seeded game slug resolves to a games activity", async () => {
+    for (const game of games) {
+      const response = await http().get(`/api/games/activities/${game.slug}`);
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ category: "games", slug });
+      expect(response.body).toMatchObject({
+        category: "games",
+        slug: game.slug,
+      });
     }
   });
 
-  it("every listed movie slug resolves to a movies activity", async () => {
-    const slugs = (await http().get("/api/categories/movies/activities"))
-      .body as string[];
-
-    for (const slug of slugs) {
-      const response = await http().get(
-        `/api/categories/movies/activities/${slug}`,
-      );
+  it("every seeded movie slug resolves to a movies activity", async () => {
+    for (const movie of movies) {
+      const response = await http().get(`/api/movies/activities/${movie.slug}`);
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ category: "movies", slug });
+      expect(response.body).toMatchObject({
+        category: "movies",
+        slug: movie.slug,
+      });
     }
   });
 
   it("returns a game by slug with the same content as the former catalogue", async () => {
     const response = await http().get(
-      "/api/categories/games/activities/the-witcher-3-wild-hunt",
+      "/api/games/activities/the-witcher-3-wild-hunt",
     );
 
     expect(response.status).toBe(200);
@@ -118,39 +98,21 @@ describe("activity catalogue API", () => {
   });
 
   it("returns a movie by slug with the same content as the former catalogue", async () => {
-    const response = await http().get(
-      "/api/categories/movies/activities/parasite",
-    );
+    const response = await http().get("/api/movies/activities/parasite");
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(expectedMovie);
   });
 
   it("returns 404 for an unknown game slug", async () => {
-    const response = await http().get(
-      "/api/categories/games/activities/no-such-activity",
-    );
+    const response = await http().get("/api/games/activities/no-such-activity");
 
     expect(response.status).toBe(404);
   });
 
   it("returns 404 for an unknown movie slug", async () => {
     const response = await http().get(
-      "/api/categories/movies/activities/no-such-activity",
-    );
-
-    expect(response.status).toBe(404);
-  });
-
-  it("returns 404 for an unknown category list", async () => {
-    const response = await http().get("/api/categories/books/activities");
-
-    expect(response.status).toBe(404);
-  });
-
-  it("returns 404 for an activity in an unknown category", async () => {
-    const response = await http().get(
-      "/api/categories/books/activities/the-witcher-3-wild-hunt",
+      "/api/movies/activities/no-such-activity",
     );
 
     expect(response.status).toBe(404);

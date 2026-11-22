@@ -1,13 +1,13 @@
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import type { NextStepResponse } from "../src/categories/next-step.service";
 import { loadConfig } from "../src/config";
 import { createApp } from "../src/create-app";
 import { migrate } from "../src/migrate";
 import { seed } from "../src/seed";
+import type { NextStepResponse } from "../src/session/present-next-step";
 import type { Activity } from "../src/types";
 
-describe("POST /api/categories/:category/next-step", () => {
+describe("POST /api/:category/next-step", () => {
   let app: INestApplication | undefined;
 
   beforeAll(async () => {
@@ -31,7 +31,7 @@ describe("POST /api/categories/:category/next-step", () => {
   };
 
   const postNextStep = (category: string, body: Record<string, unknown>) =>
-    http().post(`/api/categories/${category}/next-step`).send(body);
+    http().post(`/api/${category}/next-step`).send(body);
 
   it("returns the same first games question the client engine picks today", async () => {
     const response = await postNextStep("games", { answers: [] });
