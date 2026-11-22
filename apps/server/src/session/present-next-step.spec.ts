@@ -5,13 +5,11 @@ import { presentNextStep } from "./present-next-step";
 const questions: Question[] = [
   {
     id: "q-split",
-    category: "games",
     tagId: "split",
     text: "Want the split tag?",
   },
   {
     id: "q-other",
-    category: "games",
     tagId: "other",
     text: "Want the other tag?",
   },

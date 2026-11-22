@@ -10,35 +10,37 @@ import { syncMoviesActivityCount } from "./categories/movies/sync-movies-activit
 import { loadConfig, sslFor } from "./config";
 import type { Game, Movie, Question, Tag } from "./types";
 
+type TagTable = "games_tags" | "movies_tags";
+type QuestionTable = "games_questions" | "movies_questions";
+
 const upsertTags = async (
   client: Client,
-  category: "games" | "movies",
+  table: TagTable,
   tags: Tag[],
 ): Promise<void> => {
   for (const tag of tags) {
     await client.query(
       `
-        INSERT INTO tags (category, id, label)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (category, id) DO UPDATE SET label = EXCLUDED.label
+        INSERT INTO ${table} (id, label)
+        VALUES ($1, $2)
+        ON CONFLICT (id) DO UPDATE SET label = EXCLUDED.label
       `,
-      [category, tag.id, tag.label],
+      [tag.id, tag.label],
     );
   }
 };
 
 const deleteRemovedTags = async (
   client: Client,
-  category: "games" | "movies",
+  table: TagTable,
   tags: Tag[],
 ): Promise<void> => {
   await client.query(
     `
-      DELETE FROM tags
-      WHERE category = $1
-        AND NOT (id = ANY($2::text[]))
+      DELETE FROM ${table}
+      WHERE NOT (id = ANY($1::text[]))
     `,
-    [category, tags.map((tag) => tag.id)],
+    [tags.map((tag) => tag.id)],
   );
 };
 
@@ -66,15 +68,15 @@ const upsertGame = async (client: Client, game: Game): Promise<void> => {
     ],
   );
 
-  await client.query("DELETE FROM games_tags WHERE game_slug = $1", [
+  await client.query("DELETE FROM games_tag_links WHERE game_slug = $1", [
     game.slug,
   ]);
 
   for (const tagId of game.tags) {
     await client.query(
       `
-        INSERT INTO games_tags (game_slug, tag_category, tag_id)
-        VALUES ($1, 'games', $2)
+        INSERT INTO games_tag_links (game_slug, tag_id)
+        VALUES ($1, $2)
       `,
       [game.slug, tagId],
     );
@@ -105,15 +107,15 @@ const upsertMovie = async (client: Client, movie: Movie): Promise<void> => {
     ],
   );
 
-  await client.query("DELETE FROM movies_tags WHERE movie_slug = $1", [
+  await client.query("DELETE FROM movies_tag_links WHERE movie_slug = $1", [
     movie.slug,
   ]);
 
   for (const tagId of movie.tags) {
     await client.query(
       `
-        INSERT INTO movies_tags (movie_slug, tag_category, tag_id)
-        VALUES ($1, 'movies', $2)
+        INSERT INTO movies_tag_links (movie_slug, tag_id)
+        VALUES ($1, $2)
       `,
       [movie.slug, tagId],
     );
@@ -122,18 +124,18 @@ const upsertMovie = async (client: Client, movie: Movie): Promise<void> => {
 
 const replaceQuestions = async (
   client: Client,
-  category: "games" | "movies",
+  table: QuestionTable,
   questions: Question[],
 ): Promise<void> => {
-  await client.query("DELETE FROM questions WHERE category = $1", [category]);
+  await client.query(`DELETE FROM ${table}`);
 
   for (const [position, question] of questions.entries()) {
     await client.query(
       `
-        INSERT INTO questions (id, category, tag, text, position)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO ${table} (id, tag_id, text, position)
+        VALUES ($1, $2, $3, $4)
       `,
-      [question.id, question.category, question.tagId, question.text, position],
+      [question.id, question.tagId, question.text, position],
     );
   }
 };
@@ -155,8 +157,8 @@ export const seed = async (databaseUrl: string): Promise<void> => {
       ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
     `);
 
-    await upsertTags(client, "games", gameTags);
-    await upsertTags(client, "movies", movieTags);
+    await upsertTags(client, "games_tags", gameTags);
+    await upsertTags(client, "movies_tags", movieTags);
 
     for (const game of games) {
       await upsertGame(client, game);
@@ -173,11 +175,11 @@ export const seed = async (databaseUrl: string): Promise<void> => {
       [movies.map((movie) => movie.slug)],
     );
 
-    await replaceQuestions(client, "games", gameQuestions);
-    await replaceQuestions(client, "movies", movieQuestions);
+    await replaceQuestions(client, "games_questions", gameQuestions);
+    await replaceQuestions(client, "movies_questions", movieQuestions);
 
-    await deleteRemovedTags(client, "games", gameTags);
-    await deleteRemovedTags(client, "movies", movieTags);
+    await deleteRemovedTags(client, "games_tags", gameTags);
+    await deleteRemovedTags(client, "movies_tags", movieTags);
 
     await syncGamesActivityCount(client);
     await syncMoviesActivityCount(client);

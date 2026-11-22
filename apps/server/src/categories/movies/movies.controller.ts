@@ -8,7 +8,6 @@ import {
   Param,
   Post,
 } from "@nestjs/common";
-import { QuestionsRepository } from "../../questions/questions.repository";
 import { NextStepBodyDto } from "../../session/next-step.dto";
 import {
   type NextStepResponse,
@@ -16,14 +15,15 @@ import {
 } from "../../session/present-next-step";
 import type { Movie } from "../../types";
 import { MoviesRepository } from "./movies.repository";
+import { MoviesQuestionsRepository } from "./movies-questions.repository";
 
 @Controller("movies")
 export class MoviesController {
   constructor(
     @Inject(MoviesRepository)
     private readonly movies: MoviesRepository,
-    @Inject(QuestionsRepository)
-    private readonly questions: QuestionsRepository,
+    @Inject(MoviesQuestionsRepository)
+    private readonly questions: MoviesQuestionsRepository,
   ) {}
 
   @Get("activities/:slug")
@@ -42,7 +42,7 @@ export class MoviesController {
     @Body() body: NextStepBodyDto,
   ): Promise<NextStepResponse> {
     const [questions, activities] = await Promise.all([
-      this.questions.listByCategory("movies"),
+      this.questions.list(),
       this.movies.list(),
     ]);
 

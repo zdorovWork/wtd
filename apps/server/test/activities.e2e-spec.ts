@@ -140,9 +140,9 @@ describe("seeded catalogue integrity", () => {
   const loadCatalogue = async (category: "games" | "movies") => {
     const client = await connect();
     try {
+      const tagTable = category === "games" ? "games_tags" : "movies_tags";
       const tags = await client.query<Tag>(
-        "SELECT id, label FROM tags WHERE category = $1 ORDER BY id",
-        [category],
+        `SELECT id, label FROM ${tagTable} ORDER BY id`,
       );
       const activitySql =
         category === "games"
@@ -152,7 +152,7 @@ describe("seeded catalogue integrity", () => {
                 COALESCE(
                   (
                     SELECT array_agg(j.tag_id ORDER BY j.tag_id)
-                    FROM games_tags j
+                    FROM games_tag_links j
                     WHERE j.game_slug = a.slug
                   ),
                   '{}'
@@ -165,7 +165,7 @@ describe("seeded catalogue integrity", () => {
                 COALESCE(
                   (
                     SELECT array_agg(j.tag_id ORDER BY j.tag_id)
-                    FROM movies_tags j
+                    FROM movies_tag_links j
                     WHERE j.movie_slug = a.slug
                   ),
                   '{}'
@@ -236,11 +236,11 @@ describe("catalogue foreign keys", () => {
       await expect(
         client.query(
           `
-            INSERT INTO games_tags (game_slug, tag_category, tag_id)
-            VALUES ('hades', 'movies', 'sciFi')
+            INSERT INTO games_tag_links (game_slug, tag_id)
+            VALUES ('hades', 'bestPicture')
           `,
         ),
-      ).rejects.toMatchObject({ code: "23514" });
+      ).rejects.toMatchObject({ code: "23503" });
     } finally {
       await client.end();
     }
@@ -252,8 +252,8 @@ describe("catalogue foreign keys", () => {
       await expect(
         client.query(
           `
-            INSERT INTO games_tags (game_slug, tag_category, tag_id)
-            VALUES ('hades', 'games', 'no-such-tag')
+            INSERT INTO games_tag_links (game_slug, tag_id)
+            VALUES ('hades', 'no-such-tag')
           `,
         ),
       ).rejects.toMatchObject({ code: "23503" });

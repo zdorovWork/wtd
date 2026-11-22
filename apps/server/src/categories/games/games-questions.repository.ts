@@ -1,36 +1,32 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PostgresService } from "../postgres";
-import type { Question } from "../types";
+import { PostgresService } from "../../postgres";
+import type { Question } from "../../types";
 
 type QuestionRow = {
   id: string;
-  category: "games" | "movies";
-  tag: string;
+  tag_id: string;
   text: string;
 };
 
 const toQuestion = (row: QuestionRow): Question => ({
   id: row.id,
-  category: row.category,
-  tagId: row.tag,
+  tagId: row.tag_id,
   text: row.text,
 });
 
 @Injectable()
-export class QuestionsRepository {
+export class GamesQuestionsRepository {
   constructor(
     @Inject(PostgresService) private readonly postgres: PostgresService,
   ) {}
 
-  async listByCategory(category: string): Promise<Question[]> {
+  async list(): Promise<Question[]> {
     const result = await this.postgres.pool.query<QuestionRow>(
       `
-        SELECT id, category, tag, text
-        FROM questions
-        WHERE category = $1
+        SELECT id, tag_id, text
+        FROM games_questions
         ORDER BY position
       `,
-      [category],
     );
 
     return result.rows.map(toQuestion);
