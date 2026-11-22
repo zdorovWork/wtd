@@ -1,12 +1,12 @@
 import { Client } from "pg";
-import { syncGamesActivityCount } from "./activities/sync-games-activity-count";
-import { syncMoviesActivityCount } from "./activities/sync-movies-activity-count";
 import { gameQuestions } from "./catalogue/game-questions";
 import { gameTags } from "./catalogue/game-tags";
 import { games } from "./catalogue/games";
 import { movieQuestions } from "./catalogue/movie-questions";
 import { movieTags } from "./catalogue/movie-tags";
 import { movies } from "./catalogue/movies";
+import { syncGamesActivityCount } from "./categories/games/sync-games-activity-count";
+import { syncMoviesActivityCount } from "./categories/movies/sync-movies-activity-count";
 import { loadConfig, sslFor } from "./config";
 import type { Game, Movie, Question, Tag } from "./types";
 

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PostgresService } from "../postgres";
-import type { Movie } from "../types";
+import { PostgresService } from "../../postgres";
+import type { Movie } from "../../types";
 
 type MovieRow = {
   slug: string;

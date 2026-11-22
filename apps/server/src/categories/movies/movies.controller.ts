@@ -8,13 +8,13 @@ import {
   Param,
   Post,
 } from "@nestjs/common";
-import { QuestionsRepository } from "../questions/questions.repository";
-import { NextStepBodyDto } from "../session/next-step.dto";
+import { QuestionsRepository } from "../../questions/questions.repository";
+import { NextStepBodyDto } from "../../session/next-step.dto";
 import {
   type NextStepResponse,
   presentNextStep,
-} from "../session/present-next-step";
-import type { Movie } from "../types";
+} from "../../session/present-next-step";
+import type { Movie } from "../../types";
 import { MoviesRepository } from "./movies.repository";
 
 @Controller("movies")

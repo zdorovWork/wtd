@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { QuestionsRepository } from "../questions/questions.repository";
+import { QuestionsRepository } from "../../questions/questions.repository";
 import { GamesController } from "./games.controller";
 import { GamesRepository } from "./games.repository";
 

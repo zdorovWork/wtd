@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PostgresService } from "../postgres";
-import type { Game } from "../types";
+import { PostgresService } from "../../postgres";
+import type { Game } from "../../types";
 
 type GameRow = {
   slug: string;

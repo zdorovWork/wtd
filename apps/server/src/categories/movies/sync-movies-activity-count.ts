@@ -1,5 +1,5 @@
 import type { Client } from "pg";
-import { setActivityCount } from "../categories/activity-count";
+import { setActivityCount } from "../activity-count";
 
 export const syncMoviesActivityCount = async (
   client: Client,
