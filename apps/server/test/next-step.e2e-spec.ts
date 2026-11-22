@@ -40,7 +40,7 @@ describe("POST /api/:category/next-step", () => {
     expect(response.body).toEqual({
       kind: "question",
       question: {
-        id: "games-fantasy",
+        id: "fantasy",
         text: "Do you want a fantasy setting with magic or mythical creatures?",
       },
       answeredCount: 0,
@@ -54,7 +54,7 @@ describe("POST /api/:category/next-step", () => {
     expect(response.body).toEqual({
       kind: "question",
       question: {
-        id: "movies-dark-tone",
+        id: "dark-tone",
         text: "Are you in the mood for something dark and serious?",
       },
       answeredCount: 0,

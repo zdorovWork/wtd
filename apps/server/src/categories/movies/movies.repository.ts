@@ -25,7 +25,7 @@ const movieSelect = `
     COALESCE(
       (
         SELECT array_agg(mt.tag_id ORDER BY mt.tag_id)
-        FROM movies_tags mt
+        FROM movies_tag_links mt
         WHERE mt.movie_slug = m.slug
       ),
       '{}'

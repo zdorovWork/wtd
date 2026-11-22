@@ -25,7 +25,7 @@ const gameSelect = `
     COALESCE(
       (
         SELECT array_agg(gt.tag_id ORDER BY gt.tag_id)
-        FROM games_tags gt
+        FROM games_tag_links gt
         WHERE gt.game_slug = g.slug
       ),
       '{}'

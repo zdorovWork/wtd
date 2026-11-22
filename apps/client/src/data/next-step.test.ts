@@ -42,13 +42,13 @@ describe("fetchNextStep", () => {
     const fetchMock = mock.method(globalThis, "fetch", async () =>
       jsonResponse(200, {
         kind: "question",
-        question: { id: "games-fantasy", text: "Want fantasy?" },
+        question: { id: "fantasy", text: "Want fantasy?" },
         answeredCount: 1,
       }),
     );
 
     await fetchNextStep("games", {
-      answers: [{ questionId: "games-co-op", answer: "yes" }],
+      answers: [{ questionId: "co-op", answer: "yes" }],
       rejectedAtCount: 0,
     });
 
@@ -64,7 +64,7 @@ describe("fetchNextStep", () => {
     assert.equal(
       init?.body,
       JSON.stringify({
-        answers: [{ questionId: "games-co-op", answer: "yes" }],
+        answers: [{ questionId: "co-op", answer: "yes" }],
         rejectedAtCount: 0,
       }),
     );
@@ -75,7 +75,7 @@ describe("fetchNextStep", () => {
       jsonResponse(200, {
         kind: "question",
         question: {
-          id: "games-fantasy",
+          id: "fantasy",
           text: "Do you want a fantasy setting with magic or mythical creatures?",
         },
         answeredCount: 0,
@@ -85,7 +85,7 @@ describe("fetchNextStep", () => {
     assert.deepEqual(await fetchNextStep("games", { answers: [] }), {
       kind: "question",
       question: {
-        id: "games-fantasy",
+        id: "fantasy",
         text: "Do you want a fantasy setting with magic or mythical creatures?",
       },
       answeredCount: 0,

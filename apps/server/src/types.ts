@@ -35,7 +35,6 @@ export type Activity = Game | Movie;
 
 export type Question = {
   id: string;
-  category: "games" | "movies";
   tagId: string;
   text: string;
 };

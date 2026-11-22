@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { QuestionsRepository } from "../../questions/questions.repository";
 import { MoviesController } from "./movies.controller";
 import { MoviesRepository } from "./movies.repository";
+import { MoviesQuestionsRepository } from "./movies-questions.repository";
 
 @Module({
   controllers: [MoviesController],
-  providers: [MoviesRepository, QuestionsRepository],
+  providers: [MoviesRepository, MoviesQuestionsRepository],
 })
 export class MoviesModule {}
