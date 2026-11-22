@@ -30,8 +30,8 @@ describe("GET /api/categories", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([
-      { slug: "games", name: "Games" },
-      { slug: "movies", name: "Movies" },
+      { slug: "games", name: "Games", activityCount: 25 },
+      { slug: "movies", name: "Movies", activityCount: 25 },
     ]);
   });
 });
@@ -50,12 +50,14 @@ describe("seed", () => {
     });
     await client.connect();
     try {
-      const result = await client.query<{ slug: string; name: string }>(
-        "SELECT slug, name FROM categories ORDER BY slug",
-      );
+      const result = await client.query<{
+        slug: string;
+        name: string;
+        activity_count: number;
+      }>("SELECT slug, name, activity_count FROM categories ORDER BY slug");
       expect(result.rows).toEqual([
-        { slug: "games", name: "Games" },
-        { slug: "movies", name: "Movies" },
+        { slug: "games", name: "Games", activity_count: 25 },
+        { slug: "movies", name: "Movies", activity_count: 25 },
       ]);
     } finally {
       await client.end();

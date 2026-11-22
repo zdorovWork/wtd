@@ -1,4 +1,6 @@
 import { Client } from "pg";
+import { syncGamesActivityCount } from "./activities/sync-games-activity-count";
+import { syncMoviesActivityCount } from "./activities/sync-movies-activity-count";
 import { gameQuestions } from "./catalogue/game-questions";
 import { gameTags } from "./catalogue/game-tags";
 import { games } from "./catalogue/games";
@@ -176,6 +178,9 @@ export const seed = async (databaseUrl: string): Promise<void> => {
 
     await deleteRemovedTags(client, "games", gameTags);
     await deleteRemovedTags(client, "movies", movieTags);
+
+    await syncGamesActivityCount(client);
+    await syncMoviesActivityCount(client);
 
     await client.query("COMMIT");
   } catch (error) {

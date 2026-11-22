@@ -4,4 +4,4 @@ Activities are stored in one table per category (`games`, `movies`), each with i
 
 ## Consequences
 
-Adding a category means a new activity table, a new join table, and a new repository on the server, not just a row in `categories`. Queries that span categories need a `UNION`; none exist today.
+Adding a category means a new activity table, a new join table, a new repository, and a new controller on the server, not just a row in `categories`; that controller updates the category's activity count. Queries that span categories need a `UNION`; none exist today.

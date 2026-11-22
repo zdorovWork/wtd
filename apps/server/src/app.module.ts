@@ -1,8 +1,10 @@
 import { Module } from "@nestjs/common";
+import { GamesModule } from "./activities/games.module";
+import { MoviesModule } from "./activities/movies.module";
 import { CategoriesModule } from "./categories/categories.module";
 import { PostgresModule } from "./postgres.module";
 
 @Module({
-  imports: [PostgresModule, CategoriesModule],
+  imports: [PostgresModule, CategoriesModule, GamesModule, MoviesModule],
 })
 export class AppModule {}

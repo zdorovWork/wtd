@@ -59,14 +59,6 @@ export class MoviesRepository {
     return result.rows.map(toMovie);
   }
 
-  async listSlugs(): Promise<string[]> {
-    const result = await this.postgres.pool.query<{ slug: string }>(
-      "SELECT slug FROM movies ORDER BY slug",
-    );
-
-    return result.rows.map((row) => row.slug);
-  }
-
   async findBySlug(slug: string): Promise<Movie | null> {
     const result = await this.postgres.pool.query<MovieRow>(
       `${movieSelect} WHERE m.slug = $1`,

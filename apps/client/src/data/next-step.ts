@@ -11,7 +11,7 @@ const readServerUrl = (): string => {
 };
 
 const nextStepUrl = (category: string): string => {
-  const path = `/api/categories/${encodeURIComponent(category)}/next-step`;
+  const path = `/api/${encodeURIComponent(category)}/next-step`;
   if (typeof window !== "undefined") {
     return path;
   }

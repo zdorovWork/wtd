@@ -87,11 +87,3 @@ export const parseMovie = (value: unknown): Movie => {
     director: value.director,
   };
 };
-
-export const parseSlugList = (value: unknown): string[] => {
-  if (!isStringArray(value)) {
-    throw new Error("Invalid activity slug list from the server");
-  }
-
-  return [...value];
-};

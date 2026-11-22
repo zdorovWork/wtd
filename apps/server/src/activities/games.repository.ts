@@ -59,14 +59,6 @@ export class GamesRepository {
     return result.rows.map(toGame);
   }
 
-  async listSlugs(): Promise<string[]> {
-    const result = await this.postgres.pool.query<{ slug: string }>(
-      "SELECT slug FROM games ORDER BY slug",
-    );
-
-    return result.rows.map((row) => row.slug);
-  }
-
   async findBySlug(slug: string): Promise<Game | null> {
     const result = await this.postgres.pool.query<GameRow>(
       `${gameSelect} WHERE g.slug = $1`,

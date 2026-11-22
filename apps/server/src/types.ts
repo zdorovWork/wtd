@@ -1,6 +1,7 @@
 export type Category = {
   slug: string;
   name: string;
+  activityCount: number;
 };
 
 export type Tag = {

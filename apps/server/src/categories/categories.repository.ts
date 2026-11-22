@@ -5,6 +5,7 @@ import type { Category } from "../types";
 type CategoryRow = {
   slug: string;
   name: string;
+  activity_count: number;
 };
 
 @Injectable()
@@ -15,21 +16,13 @@ export class CategoriesRepository {
 
   async list(): Promise<Category[]> {
     const result = await this.postgres.pool.query<CategoryRow>(
-      "SELECT slug, name FROM categories ORDER BY slug",
+      "SELECT slug, name, activity_count FROM categories ORDER BY slug",
     );
 
     return result.rows.map((row) => ({
       slug: row.slug,
       name: row.name,
+      activityCount: row.activity_count,
     }));
-  }
-
-  async exists(slug: string): Promise<boolean> {
-    const result = await this.postgres.pool.query<{ slug: string }>(
-      "SELECT slug FROM categories WHERE slug = $1",
-      [slug],
-    );
-
-    return result.rows.length > 0;
   }
 }
