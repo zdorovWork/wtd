@@ -7,12 +7,15 @@ import {
   QuizSessionContext,
   type QuizSessionValue,
 } from "./quiz-session-context";
-
-type SessionFrame = {
-  answers: GivenAnswer[];
-  rejectedAtCount?: number;
-  step: NextStep;
-};
+import {
+  appendStep,
+  dismissActivityWish as closeActivityWish,
+  createInitialFrames,
+  popFrame,
+  resetFrames,
+  sessionView,
+  saveActivityWish as storeActivityWish,
+} from "./session-frame";
 
 type FailedRequest = {
   answers: GivenAnswer[];
@@ -30,19 +33,19 @@ export const QuizSessionProvider = ({
   initialStep,
   children,
 }: QuizSessionProviderProps) => {
-  const [frames, setFrames] = useState<SessionFrame[]>([
-    { answers: [], step: initialStep },
-  ]);
+  const [frames, setFrames] = useState(() => createInitialFrames(initialStep));
   const [isPending, setIsPending] = useState(false);
   const [failedRequest, setFailedRequest] = useState<FailedRequest | null>(
     null,
   );
   const isPendingRef = useRef(false);
 
-  const current = frames[frames.length - 1];
+  const current = frames.at(-1);
   if (!current) {
     throw new Error("Quiz session has no steps");
   }
+
+  const view = sessionView(frames);
 
   const requestStep = async (
     answers: GivenAnswer[],
@@ -60,10 +63,9 @@ export const QuizSessionProvider = ({
         throw new Error("Failed to load next step: 404");
       }
 
-      setFrames((currentFrames) => [
-        ...currentFrames,
-        { answers, rejectedAtCount, step },
-      ]);
+      setFrames((currentFrames) =>
+        appendStep(currentFrames, { answers, rejectedAtCount, step }),
+      );
     } catch {
       setFailedRequest({ answers, rejectedAtCount });
     } finally {
@@ -73,7 +75,9 @@ export const QuizSessionProvider = ({
   };
 
   const answer = (givenAnswer: Answer) => {
-    if (failedRequest || current.step.kind !== "question") return;
+    if (failedRequest || !view.canAnswer || current.step.kind !== "question") {
+      return;
+    }
 
     void requestStep(
       [
@@ -92,13 +96,11 @@ export const QuizSessionProvider = ({
       return;
     }
 
-    setFrames((currentFrames) =>
-      currentFrames.length > 1 ? currentFrames.slice(0, -1) : currentFrames,
-    );
+    setFrames(popFrame);
   };
 
   const keepAsking = () => {
-    if (failedRequest || current.step.kind !== "recommendation") return;
+    if (failedRequest || !view.canKeepAsking) return;
 
     void requestStep(current.answers, current.answers.length);
   };
@@ -107,7 +109,7 @@ export const QuizSessionProvider = ({
     if (isPendingRef.current) return;
 
     setFailedRequest(null);
-    setFrames((currentFrames) => currentFrames.slice(0, 1));
+    setFrames(resetFrames);
   };
 
   const retry = () => {
@@ -116,16 +118,30 @@ export const QuizSessionProvider = ({
     void requestStep(failedRequest.answers, failedRequest.rejectedAtCount);
   };
 
+  const saveActivityWish = (text: string) => {
+    setFrames((currentFrames) => storeActivityWish(currentFrames, text));
+  };
+
+  const dismissActivityWish = () => {
+    setFrames(closeActivityWish);
+  };
+
   const value: QuizSessionValue = {
-    step: current.step,
+    step: view.step,
     isPending,
     error: failedRequest !== null,
     canGoBack: failedRequest !== null || frames.length > 1,
+    canAnswer: view.canAnswer,
+    canKeepAsking: view.canKeepAsking,
+    isActivityWishOpen: view.isActivityWishOpen,
+    isActivityWishStep: view.isActivityWishStep,
     answer,
     goBack,
     keepAsking,
     startOver,
     retry,
+    saveActivityWish,
+    dismissActivityWish,
   };
 
   return (

@@ -54,4 +54,5 @@ export type Activity = Game | Movie;
 
 export type NextStep =
   | { kind: "question"; question: SessionQuestion; answeredCount: number }
-  | { kind: "recommendation"; activities: Activity[] };
+  | { kind: "recommendation"; activities: Activity[] }
+  | { kind: "activityWish" };

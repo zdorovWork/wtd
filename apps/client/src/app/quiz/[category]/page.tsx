@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { getCategories } from "@/data/categories";
 import { fetchNextStep } from "@/data/next-step";
+import { ActivityWishModal } from "@/features/activity-wish-modal";
 import { BackButton } from "@/features/back-button";
 import { QuizSessionProvider, QuizStep } from "@/modules/quiz-session";
 import { IconButton } from "@/shared/components/icon-button";
@@ -24,6 +25,14 @@ const SessionPage = async ({ params }: PageProps<"/quiz/[category]">) => {
 
   if (!initialStep || !selectedCategory) notFound();
 
+  const sessionChrome = (
+    <header className="flex items-center justify-between">
+      <BackButton />
+      <Pill>{selectedCategory.name}</Pill>
+      <IconButton label="Home" icon={<HomeIcon />} href="/" />
+    </header>
+  );
+
   return (
     <QuizSessionProvider
       key={selectedCategory.slug}
@@ -34,17 +43,15 @@ const SessionPage = async ({ params }: PageProps<"/quiz/[category]">) => {
         <QuizStep
           question={
             <>
-              <header className="flex items-center justify-between">
-                <BackButton />
-                <Pill>{selectedCategory.name}</Pill>
-                <IconButton label="Home" icon={<HomeIcon />} href="/" />
-              </header>
+              {sessionChrome}
               <QuestionPrompt />
               <AnswerList />
             </>
           }
           recommendation={<RecommendationPanel />}
+          chrome={sessionChrome}
         />
+        <ActivityWishModal />
       </main>
     </QuizSessionProvider>
   );

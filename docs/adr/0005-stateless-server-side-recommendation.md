@@ -1,6 +1,6 @@
 # Recommendations computed by a stateless server
 
-The recommendation engine runs on `apps/server`, not in the browser: on every step the client sends the category, all answers given so far, and the rejection point, and the server replies with the next question or the recommendation. The server keeps no session state, so a session lives entirely in the client and undoing an answer stays a recompute (`0002-tag-scoring-recommendation-engine.md`). We chose this over keeping the engine in the client, which would keep shipping the whole category catalogue to the browser, and over server-stored sessions, which add storage, ids, and expiry for no product gain today.
+The recommendation engine runs on `apps/server`, not in the browser: on every step the client sends the category, all answers given so far, and the rejection point, and the server replies with the next question, the recommendation, or `activityWish` when the only stop is that no remaining question would split the leaders. The activity wish text stays in the client and is not sent back for scoring. The server keeps no session state, so a session lives entirely in the client and undoing an answer stays a recompute (`0002-tag-scoring-recommendation-engine.md`). We chose this over keeping the engine in the client, which would keep shipping the whole category catalogue to the browser, and over server-stored sessions, which add storage, ids, and expiry for no product gain today.
 
 ## Consequences
 
