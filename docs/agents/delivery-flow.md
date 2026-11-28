@@ -26,9 +26,9 @@ feature/WTD-<n>-<slug> --PR--> develop --PR--> main
 
 ## Per-task flow
 
-1. The user asks for a task; the agent implements it on a `feature/WTD-<n>-<slug>` branch (created from `develop`) and runs `pnpm check`, `pnpm test`, `pnpm build`. No commit yet.
+1. Pull `develop`, create `feature/WTD-<n>-<slug>` from it, then read engine and session files on that branch. After the checkout: `pnpm --filter @wtd/server migrate` and `pnpm --filter @wtd/server seed`. Implement. Run `pnpm check`, `pnpm test`, `pnpm build`. `pnpm test` includes server e2e and needs Compose. No commit yet.
 2. The user tests the task manually, locally, and approves or requests changes.
-3. After the user's approval the agent commits, pushes, and opens a PR into `develop`.
+3. After the user's approval the agent commits, pushes, and opens a PR into `develop`. If `next dev` injected the `nextjs-agent-rules` block into `apps/client/AGENTS.md`, restore that file before the feature commit.
 4. If the task has a GitHub issue, the agent adds a short comment on it: what was built, the PR link, and known limitations if any. The user ticks the acceptance criteria.
 5. The user merges the PR into `develop`; `Closes #<n>` closes the issue.
 6. Releases to `main` are a separate step, done only when the user asks.
