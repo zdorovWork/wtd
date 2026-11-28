@@ -52,4 +52,55 @@ describe("presentNextStep", () => {
       answeredCount: 0,
     });
   });
+
+  it("returns a recommendation when a single leader stands out", () => {
+    const step = presentNextStep(
+      questions,
+      [
+        activity("a0", ["split", "other"]),
+        activity("a1", ["split"]),
+        activity("a2", []),
+      ],
+      {
+        answers: [
+          { questionId: "q-split", answer: "yes" },
+          { questionId: "q-other", answer: "yes" },
+        ],
+      },
+    );
+
+    expect(step.kind).toBe("recommendation");
+  });
+
+  it("returns the remaining leaders when no remaining question splits them", () => {
+    const step = presentNextStep(questions, activities, {
+      answers: [
+        { questionId: "q-split", answer: "dontKnow" },
+        { questionId: "q-other", answer: "dontKnow" },
+      ],
+    });
+
+    expect(step.kind).toBe("recommendation");
+    if (step.kind === "recommendation") {
+      expect(step.activities.map((recommended) => recommended.slug)).toEqual([
+        "a0",
+        "a1",
+        "a2",
+        "a3",
+        "a4",
+      ]);
+    }
+  });
+
+  it("returns an activity wish after a rejection when no remaining question splits the leaders", () => {
+    expect(
+      presentNextStep(questions, activities, {
+        answers: [
+          { questionId: "q-split", answer: "dontKnow" },
+          { questionId: "q-other", answer: "dontKnow" },
+        ],
+        rejectedAtCount: 2,
+      }),
+    ).toEqual({ kind: "activityWish" });
+  });
 });

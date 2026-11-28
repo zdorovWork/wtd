@@ -147,11 +147,11 @@ describe("getNextStep: answers", () => {
     );
 
   test("Yes ranks activities with the tag first", () => {
-    expect(rank("yes")).toEqual(["with", "without"]);
+    expect(rank("yes")).toEqual(["with"]);
   });
 
   test("No ranks activities without the tag first", () => {
-    expect(rank("no")).toEqual(["without", "with"]);
+    expect(rank("no")).toEqual(["without"]);
   });
 
   test("Probably and Probably not lean the same way as Yes and No", () => {
@@ -177,12 +177,7 @@ describe("getNextStep: answers", () => {
         answers: [answered("first", "yes"), answered("second", "probablyNot")],
       });
 
-      expect(recommendedSlugs(step)).toEqual([
-        "yesNo",
-        "yesYes",
-        "noNo",
-        "noYes",
-      ]);
+      expect(recommendedSlugs(step)).toEqual(["yesNo", "yesYes"]);
     });
 
     test("two Probably answers weigh exactly as much as one opposing Yes", () => {
@@ -222,18 +217,13 @@ describe("getNextStep: answers", () => {
         answers: [answered("first", "probably"), answered("second", "no")],
       });
 
-      expect(recommendedSlugs(step)).toEqual([
-        "yesNo",
-        "noNo",
-        "yesYes",
-        "noYes",
-      ]);
+      expect(recommendedSlugs(step)).toEqual(["yesNo", "noNo"]);
     });
   });
 });
 
 describe("getNextStep: stop conditions", () => {
-  test("recommends when only questions whose tag no candidate or every candidate has remain", () => {
+  test("recommends the remaining leaders when no unanswered question still splits them", () => {
     const activities = Array.from({ length: 10 }, (_, index) =>
       activity(`a${index}`, tagsWhere({ even: index < 5, everyone: true })),
     );
@@ -247,7 +237,7 @@ describe("getNextStep: stop conditions", () => {
     expect(recommendedSlugs(step)).toEqual(["a0", "a1", "a2", "a3", "a4"]);
   });
 
-  test("recommends once a few leaders clearly lead the rest, but not before", () => {
+  test("keeps asking while more than one leader remains and a question can still split them", () => {
     const activities = Array.from({ length: 8 }, (_, index) =>
       activity(
         `a${index}`,
@@ -256,19 +246,19 @@ describe("getNextStep: stop conditions", () => {
     );
     const questions = [question("first"), question("second")];
 
-    const clearLead = getNextStep({
+    const threeLeaders = getNextStep({
       activities,
       questions,
       answers: [answered("first", "yes")],
     });
-    const slightLead = getNextStep({
+    const oneLeader = getNextStep({
       activities,
       questions,
-      answers: [answered("first", "probably")],
+      answers: [answered("first", "yes"), answered("second", "yes")],
     });
 
-    expect(recommendedSlugs(clearLead)).toEqual(["a0", "a1", "a2", "a3", "a4"]);
-    expect(askedQuestionId(slightLead)).toBe("q-second");
+    expect(askedQuestionId(threeLeaders)).toBe("q-second");
+    expect(recommendedSlugs(oneLeader)).toEqual(["a0"]);
   });
 
   test("recommends after 15 answered questions even if useful ones remain", () => {
@@ -324,28 +314,6 @@ describe("getNextStep: session controls", () => {
     expect(askedQuestionId(afterUndo)).toBe("q-even");
   });
 
-  test("keeps asking after a rejection although the leaders stand out", () => {
-    const activities = activitiesSplitBy(8, "first", 3).map((candidate) => ({
-      ...candidate,
-      tags:
-        candidate.slug === "a0"
-          ? [...candidate.tags, "second"]
-          : candidate.tags,
-    }));
-    const input = {
-      activities,
-      questions: [question("first"), question("second")],
-      answers: [answered("first", "yes")],
-    };
-
-    expect(getNextStep(input).kind).toBe("recommendation");
-
-    const rejected = getNextStep({ ...input, rejectedAtCount: 1 });
-
-    expect(askedQuestionId(rejected)).toBe("q-second");
-    expect(rejected.kind === "question" && rejected.answeredCount).toBe(1);
-  });
-
   test("counts the question limit from the rejected recommendation", () => {
     const input = {
       activities: manyTagsActivities,
@@ -375,7 +343,7 @@ describe("getNextStep: session controls", () => {
     expect(atNewLimit.kind).toBe("recommendation");
   });
 
-  test("shows the recommendation again when no useful question is left after a rejection", () => {
+  test("asks for an activity wish when no useful question is left after a rejection", () => {
     const activities = activitiesSplitBy(8, "tag", 2);
     const input = {
       activities,
@@ -383,29 +351,29 @@ describe("getNextStep: session controls", () => {
       answers: [answered("tag", "yes")],
     };
 
-    const step = getNextStep({ ...input, rejectedAtCount: 1 });
-
-    expect(step).toEqual(getNextStep(input));
-    expect(step.kind).toBe("recommendation");
+    expect(recommendedSlugs(getNextStep(input))).toEqual(["a0", "a1"]);
+    expect(getNextStep({ ...input, rejectedAtCount: 1 })).toEqual({
+      kind: "activityWish",
+    });
   });
 });
 
 describe("getNextStep: recommendation", () => {
-  test("holds the five best-ranked activities", () => {
+  test("holds the remaining leaders rather than padding with the rest of the ranking", () => {
     const step = getNextStep({
       activities: activitiesSplitBy(8, "tag", 2).toReversed(),
       questions: [question("tag")],
       answers: [answered("tag", "yes")],
     });
 
-    expect(recommendedSlugs(step)).toEqual(["a1", "a0", "a7", "a6", "a5"]);
+    expect(recommendedSlugs(step)).toEqual(["a1", "a0"]);
   });
 
-  test("holds every activity when the category has fewer than five", () => {
+  test("holds every remaining leader when there are fewer than five", () => {
     const step = getNextStep({
       activities: activitiesSplitBy(3, "tag", 1),
-      questions: [question("tag")],
-      answers: [],
+      questions: [question("tag"), question("everyone")],
+      answers: [answered("tag", "dontKnow")],
     });
 
     expect(recommendedSlugs(step)).toEqual(["a0", "a1", "a2"]);

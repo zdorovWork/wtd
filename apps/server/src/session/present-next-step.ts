@@ -9,7 +9,8 @@ export type NextStepResponse =
       question: { id: string; text: string };
       answeredCount: number;
     }
-  | { kind: "recommendation"; activities: Activity[] };
+  | { kind: "recommendation"; activities: Activity[] }
+  | { kind: "activityWish" };
 
 export const presentNextStep = (
   questions: Question[],
@@ -39,5 +40,9 @@ export const presentNextStep = (
     };
   }
 
-  return { kind: "recommendation", activities: step.activities };
+  if (step.kind === "recommendation") {
+    return { kind: "recommendation", activities: step.activities };
+  }
+
+  return { kind: "activityWish" };
 };

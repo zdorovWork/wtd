@@ -82,6 +82,10 @@ const parseNextStep = (value: unknown): NextStep => {
     };
   }
 
+  if (value.kind === "activityWish") {
+    return { kind: "activityWish" };
+  }
+
   throw new Error("Invalid next step from the server");
 };
 

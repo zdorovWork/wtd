@@ -7,6 +7,7 @@ type ButtonBaseProps = {
   children: ReactNode;
   variant?: ButtonVariant;
   className?: string;
+  id?: string;
 };
 
 type ButtonLinkProps = ButtonBaseProps & {
@@ -41,6 +42,7 @@ export const Button = ({
   children,
   variant = "primary",
   className = "",
+  id,
   href,
   onClick,
   type = "button",
@@ -50,7 +52,7 @@ export const Button = ({
 
   if (href) {
     return (
-      <Link href={href} className={classNames}>
+      <Link href={href} id={id} className={classNames}>
         {children}
       </Link>
     );
@@ -58,6 +60,7 @@ export const Button = ({
 
   return (
     <button
+      id={id}
       type={type}
       onClick={onClick}
       disabled={disabled}

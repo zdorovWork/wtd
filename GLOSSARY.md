@@ -37,3 +37,7 @@ _Avoid_: Quiz, game, round
 **Recommendation**:
 The ranked set of up to five activities that best fit the answers given so far in a session. The person may reject it and keep answering in the same session.
 _Avoid_: Result, match, suggestion
+
+**Activity wish**:
+The free-text a person writes about the activity they wanted when the session could not recommend because no remaining question would split the leaders. wtd asks for it in a modal over the last question or recommendation, not on a separate screen.
+_Avoid_: Description, meant activity, request, suggestion, feedback, activity-wish step

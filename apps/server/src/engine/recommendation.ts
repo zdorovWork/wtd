@@ -32,9 +32,13 @@ export type NextStep<
   TQuestion extends ScorableQuestion,
 > =
   | { kind: "question"; question: TQuestion; answeredCount: number }
-  | { kind: "recommendation"; activities: TActivity[] };
+  | { kind: "recommendation"; activities: TActivity[] }
+  | { kind: "activityWish" };
 
 export const RECOMMENDATION_SIZE = 5;
+
+/** Recommend as soon as this many activities clearly lead the rest. */
+export const CLEAR_LEADER_COUNT = 1;
 
 /** Answered questions after which wtd recommends even without clear leaders. */
 export const QUESTION_LIMIT = 15;
@@ -130,17 +134,30 @@ export const getNextStep = <
     );
 
   const wasRejected = rejectedAtCount !== undefined;
-  const leadersStandOut = !wasRejected && leaders.length <= RECOMMENDATION_SIZE;
+  const singleLeaderStandsOut =
+    !wasRejected && leaders.length <= CLEAR_LEADER_COUNT;
   const reachedLimit =
     answers.length - (rejectedAtCount ?? 0) >= QUESTION_LIMIT;
 
-  if (leadersStandOut || reachedLimit || !bestQuestion) {
-    return {
-      kind: "recommendation",
-      activities: ranked
-        .slice(0, RECOMMENDATION_SIZE)
-        .map((scored) => scored.activity),
-    };
+  const recommend = (activitiesToShow: TActivity[]) => ({
+    kind: "recommendation" as const,
+    activities: activitiesToShow.slice(0, RECOMMENDATION_SIZE),
+  });
+
+  if (singleLeaderStandsOut) {
+    return recommend(leaders);
+  }
+
+  if (reachedLimit) {
+    return recommend(ranked.map((scored) => scored.activity));
+  }
+
+  if (!bestQuestion) {
+    if (wasRejected) {
+      return { kind: "activityWish" };
+    }
+
+    return recommend(leaders);
   }
 
   return {

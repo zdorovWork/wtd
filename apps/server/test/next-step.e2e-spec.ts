@@ -88,6 +88,12 @@ describe("POST /api/:category/next-step", () => {
         continue;
       }
 
+      if (body.kind === "activityWish") {
+        expect(rejectedAtCount).toBeDefined();
+        expect(firstRecommendation).toBeDefined();
+        return;
+      }
+
       expect(body.kind).toBe("recommendation");
       expect(body.activities.length).toBeGreaterThan(0);
       expect(body.activities.length).toBeLessThanOrEqual(5);

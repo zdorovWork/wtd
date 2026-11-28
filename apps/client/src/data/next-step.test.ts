@@ -92,6 +92,27 @@ describe("fetchNextStep", () => {
     });
   });
 
+  test("returns an activity wish", async () => {
+    mock.method(globalThis, "fetch", async () =>
+      jsonResponse(200, { kind: "activityWish" }),
+    );
+
+    assert.deepEqual(await fetchNextStep("games", { answers: [] }), {
+      kind: "activityWish",
+    });
+  });
+
+  test("an unknown step kind is an error", async () => {
+    mock.method(globalThis, "fetch", async () =>
+      jsonResponse(200, { kind: "feedback" }),
+    );
+
+    await assert.rejects(
+      () => fetchNextStep("games", { answers: [] }),
+      /Invalid next step from the server/,
+    );
+  });
+
   test("returns a recommendation of activities", async () => {
     mock.method(globalThis, "fetch", async () =>
       jsonResponse(200, {

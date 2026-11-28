@@ -16,8 +16,12 @@ export const RecommendationIntro = () => {
 
   if (step.kind !== "recommendation") return null;
 
-  const isSingle = step.activities.length === 1;
   const Duck = isPending ? ThinkingDuck : HappyDuck;
+  const matchCount = step.activities.length;
+  const matchLine =
+    matchCount === 1
+      ? "1 activity matches your clues."
+      : `${matchCount} activities match your clues. Swipe through them.`;
 
   return (
     <section className="grid grid-cols-[34%_1fr] items-end gap-3">
@@ -31,12 +35,10 @@ export const RecommendationIntro = () => {
           tabIndex={-1}
           ref={headingRef}
         >
-          {isSingle ? "Case closed!" : "I've got my suspects!"}
+          I've got my suspects!
         </Typography>
         <Typography as="p" size="sm" color="muted" className="mt-1">
-          {isSingle
-            ? "Elementary. This one fits you best:"
-            : `${step.activities.length} activities match your clues. Swipe through them.`}
+          {matchLine}
         </Typography>
       </SpeechBubble>
     </section>

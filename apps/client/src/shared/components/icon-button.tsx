@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 type IconButtonBaseProps = {
   label: string;
   icon: ReactNode;
+  id?: string;
 };
 
 type IconButtonLinkProps = IconButtonBaseProps & {
@@ -26,13 +27,14 @@ const className =
 export const IconButton = ({
   label,
   icon,
+  id,
   href,
   onClick,
   disabled = false,
 }: IconButtonProps) => {
   if (href) {
     return (
-      <Link href={href} aria-label={label} className={className}>
+      <Link href={href} id={id} aria-label={label} className={className}>
         {icon}
       </Link>
     );
@@ -40,6 +42,7 @@ export const IconButton = ({
 
   return (
     <button
+      id={id}
       type="button"
       aria-label={label}
       onClick={onClick}
