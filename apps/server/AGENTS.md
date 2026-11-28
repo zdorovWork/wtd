@@ -11,6 +11,12 @@ NestJS (default Express adapter), TypeScript, Jest. Postgres through `pg` with h
 
 `pnpm dev` loads `.env` with Node `--env-file`. Migrate, seed, and tests use `--env-file-if-exists` so CI can pass `DATABASE_URL` without a file. The process throws at startup when `DATABASE_URL` is missing.
 
+After pulling `develop`, migrate and seed before opening the app. `Failed to load categories` or a 500 from `GET /api/categories` after a pull is schema drift: migrate and seed.
+
+## Engine
+
+Stop rules and next-step kinds live in `src/engine/recommendation.ts` (`getNextStep`: `CLEAR_LEADER_COUNT`, `QUESTION_LIMIT`, leftover leaders vs `activityWish`). HTTP shape is `src/session/present-next-step.ts`.
+
 ## Migrate
 
 Plain-SQL files in `migrations/`, run by `node-pg-migrate` via `src/migrate.ts`.

@@ -37,7 +37,11 @@ Create a GitHub issue.
 
 ## When a skill says "fetch the relevant ticket"
 
-Read it as in **Read an issue** above.
+Read it as in **Read an issue** above. The Agent Brief comment is the spec `/implement` follows.
+
+## Agent Brief
+
+Engine stop rules go in as numbers (`CLEAR_LEADER_COUNT`, `RECOMMENDATION_SIZE` card cap, `QUESTION_LIMIT`). A grill that changes a threshold rewrites those numbers in the brief.
 
 ## Wayfinding operations
 

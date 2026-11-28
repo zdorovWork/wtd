@@ -35,9 +35,9 @@ One run of questions and answers within a single chosen category, from the first
 _Avoid_: Quiz, game, round
 
 **Recommendation**:
-The ranked set of up to five activities that best fit the answers given so far in a session. The person may reject it and keep answering in the same session.
+The session's remaining leaders, shown as at most five cards. Five is the card cap, not the stop: wtd keeps asking while more than one leader remains and a question can still split them. It recommends when one leader stands out, when 15 answers have been given (top five of the ranking), or when no remaining question would split the leaders (the leftover pack, even if fewer than five). The person may reject it and keep answering in the same session.
 _Avoid_: Result, match, suggestion
 
 **Activity wish**:
-The free-text a person writes about the activity they wanted when the session could not recommend because no remaining question would split the leaders. wtd asks for it in a modal over the last question or recommendation, not on a separate screen.
+The free-text a person writes about the activity they wanted after Keep asking, when no remaining question would split the leaders. The first time questions run out, that is still a recommendation of leftover leaders. wtd asks for the wish in a modal over the last question or recommendation, not on a separate screen.
 _Avoid_: Description, meant activity, request, suggestion, feedback, activity-wish step
